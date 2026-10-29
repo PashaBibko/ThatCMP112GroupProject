@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = UnityEngine.Vector3;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -23,18 +26,20 @@ public class RaceGenerator : MonoBehaviour
         public float Distance;
     }
 
-    private Vector2? TryGetControlPoint(Vector2 start, Vector2 end, Vector2 dir)
+    private static Vector2 TryGetControlPoint(Vector2 start, Vector2 end, Vector2 dir, out bool backwards)
     {
+        backwards = false;
+        
         Vector2 normal = end - start;
         Vector2 mid = (start + end) * 0.5f;
         
         float dot = Vector2.Dot(dir, normal);
         if (Mathf.Abs(dot) < Mathf.Epsilon) // Bisector is parallel
-            return null;
+            throw new InvalidOperationException("Uhh FUCK");
 
         float t = Vector2.Dot(mid - start, normal) / dot;
         if (t < 0f) // Intersection is behind
-            return null;
+            backwards = true;
 
         return start + dir * t;
     }
@@ -43,7 +48,7 @@ public class RaceGenerator : MonoBehaviour
     {
         Random.InitState(RandomSeed);
         
-        const int TRACK_POINTS = 3;
+        const int TRACK_POINTS = 6;
         TrackPoints.Clear();
 
         List<GameObject> children = new();
@@ -116,12 +121,51 @@ public class RaceGenerator : MonoBehaviour
             }
             else
             {
-                Vector2 a = new(start.x, start.z);
-                Vector2 b = new(end.x, end.z);
+                Vector3 controlPoint = TryGetControlPoint
+                (
+                    new Vector2(start.x, start.z),
+                    new Vector2(end.x, end.z),
+                    new Vector2(lastEndDirection.Value.x, lastEndDirection.Value.z),
+                    out bool isBackwards
+                );
+
+                if (!isBackwards)
+                {
+                    spline.ControlPoint = new Vector3(controlPoint.x, 0f, controlPoint.y);
+                }
                 
-                Vector2 dir = new(lastEndDirection.Value.x, lastEndDirection.Value.z);
-                Vector2 control = TryGetControlPoint(a, b, dir).Value;
-                spline.ControlPoint = new Vector3(control.x, 0f, control.y);
+                else
+                {
+                    GameObject flipA = new("TrackFlip-A-OfSection-" + i);
+                    flipA.GetOrAddComponent<MeshRenderer>().sharedMaterial = SharedMat;
+                    flipA.transform.SetParent(transform);
+                    TrackSpline flipSplineA = flipA.AddComponent<TrackSpline>();
+                    
+                    GameObject flipB = new("TrackFlip-A-OfSection-" + i);
+                    flipB.GetOrAddComponent<MeshRenderer>().sharedMaterial = SharedMat;
+                    flipB.transform.SetParent(transform);
+                    TrackSpline flipSplineB = flipB.AddComponent<TrackSpline>();
+
+                    Vector3 curveStart = start;
+                    Vector3 curveEnd = start + Vector3.up * 20f;
+                    Vector3 curveMid = start + lastEndDirection.Value * 10f + Vector3.up * 10f;
+                    Vector3 curveControlA = curveStart + lastEndDirection.Value * 10f;
+                    Vector3 curveControlB = curveEnd + lastEndDirection.Value * 10f;
+                    
+                    flipSplineA.StartPoint = curveStart;
+                    flipSplineA.ControlPoint = curveControlA;
+                    flipSplineA.EndPoint = curveMid;
+                    flipSplineA.GenerateMesh();
+
+                    flipSplineB.StartPoint = curveMid;
+                    flipSplineB.ControlPoint = curveControlB;
+                    flipSplineB.EndPoint = curveEnd;
+                    flipSplineB.GenerateMesh();
+
+                    spline.StartPoint = curveEnd;
+                    spline.ControlPoint = new Vector3(controlPoint.x, spline.StartPoint.y, controlPoint.y);
+                    spline.EndPoint = new Vector3(spline.EndPoint.x, curveEnd.y, spline.EndPoint.z);
+                }
             }
 
             lastEndDirection = spline.GetDirectionAtPoint(1f).normalized;
