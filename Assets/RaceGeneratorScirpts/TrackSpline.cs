@@ -8,16 +8,14 @@ using UnityEditor;
 [ExecuteAlways, RequireComponent(typeof(MeshRenderer), typeof(MeshFilter))]
 public class TrackSpline : MonoBehaviour
 {
-    [field: SerializeField] public Vector3 StartPoint { get; private set; }
-    [field: SerializeField] public Vector3 ControlPoint { get; private set; }
-    [field: SerializeField] public Vector3 EndPoint { get; private set; }
+    [field: SerializeField] public Vector3 StartPoint { get; internal set; }
+    [field: SerializeField] public Vector3 ControlPoint { get; internal set; }
+    [field: SerializeField] public Vector3 EndPoint { get; internal set; }
 
-    private MeshRenderer mRenderer;
     private MeshFilter mFilter;
 
     private void Awake()
     {
-        mRenderer = GetComponent<MeshRenderer>();
         mFilter = GetComponent<MeshFilter>();
 
         GenerateMesh();
