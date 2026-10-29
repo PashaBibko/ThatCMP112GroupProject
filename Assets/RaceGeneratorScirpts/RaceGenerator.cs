@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
-using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -15,18 +14,36 @@ public class RaceGenerator : MonoBehaviour
 {
     [SerializeField] private List<Vector3> TrackPoints = new();
     [SerializeField] private int RandomSeed = 23117;
+    [SerializeField] private Material SharedMat;
 
     [Serializable]
     private struct PolarCoord
     {
         public float Angle;
         public float Distance;
-        public float Elevation;
+    }
+
+    private Vector2? TryGetControlPoint(Vector2 start, Vector2 end, Vector2 dir)
+    {
+        Vector2 normal = end - start;
+        Vector2 mid = (start + end) * 0.5f;
+        
+        float dot = Vector2.Dot(dir, normal);
+        if (Mathf.Abs(dot) < Mathf.Epsilon) // Bisector is parallel
+            return null;
+
+        float t = Vector2.Dot(mid - start, normal) / dot;
+        if (t < 0f) // Intersection is behind
+            return null;
+
+        return start + dir * t;
     }
 
     public void GenerateNewTrack()
     {
-        const int TRACK_POINTS = 5;
+        Random.InitState(RandomSeed);
+        
+        const int TRACK_POINTS = 3;
         TrackPoints.Clear();
 
         List<GameObject> children = new();
@@ -47,25 +64,23 @@ public class RaceGenerator : MonoBehaviour
             Destroy(child);
         }
 
-        List<Vector3> unsortedPoints = new();
+        List<Vector2> unsortedPoints = new();
         for (int i = 0; i < TRACK_POINTS; i++)
         {
             Vector2 point = Random.insideUnitCircle * 20f;
-            unsortedPoints.Add(new Vector3(point.x, 0f, point.y));
+            unsortedPoints.Add(new Vector2(point.x, point.y));
         }
 
         List<PolarCoord> polarCoords = new();
-        foreach (Vector3 point in unsortedPoints)
+        foreach (Vector2 point in unsortedPoints)
         {
-            float angle = Mathf.Atan2(point.z, point.x);
-            float elevation = point.y;
-            float distance = Mathf.Clamp(new Vector2(point.x, point.z).magnitude, 5f, 20f);
+            float angle = Mathf.Atan2(point.y, point.x);
+            float distance = Mathf.Clamp(new Vector2(point.x, point.y).magnitude, 5f, 20f);
 
             polarCoords.Add(new PolarCoord
             {
                 Angle = angle,
                 Distance = distance,
-                Elevation = elevation
             });
         }
 
@@ -74,15 +89,18 @@ public class RaceGenerator : MonoBehaviour
         foreach (PolarCoord coord in sortedPolar)
             TrackPoints.Add(new Vector3(
                 Mathf.Cos(coord.Angle) * coord.Distance,
-                coord.Elevation,
+                0f,
                 Mathf.Sin(coord.Angle) * coord.Distance)
             );
         
         //
+        Vector3? lastEndDirection = null;
         for (int i = 0; i < TrackPoints.Count - 1; i++)
         {
             GameObject go = new("TrackSection-" + i);
             go.transform.SetParent(transform);
+            
+            go.GetOrAddComponent<MeshRenderer>().sharedMaterial = SharedMat;
             
             Vector3 start = TrackPoints[i];
             Vector3 end = TrackPoints[i + 1];
@@ -90,7 +108,23 @@ public class RaceGenerator : MonoBehaviour
             TrackSpline spline = go.AddComponent<TrackSpline>();
             spline.StartPoint = start;
             spline.EndPoint = end;
-            spline.ControlPoint = (start + end) / 2f; // temporary
+
+            if (lastEndDirection == null)
+            {
+                spline.ControlPoint = (start + end) * 0.5f;
+                Debug.Log("Used default ControlPoint");
+            }
+            else
+            {
+                Vector2 a = new(start.x, start.z);
+                Vector2 b = new(end.x, end.z);
+                
+                Vector2 dir = new(lastEndDirection.Value.x, lastEndDirection.Value.z);
+                Vector2 control = TryGetControlPoint(a, b, dir).Value;
+                spline.ControlPoint = new Vector3(control.x, 0f, control.y);
+            }
+
+            lastEndDirection = spline.GetDirectionAtPoint(1f).normalized;
             spline.GenerateMesh();
         }
 
@@ -107,7 +141,7 @@ public class RaceGenerator : MonoBehaviour
 #endif // UNITY_EDITOR
     }
 
-    private void OnDrawGizmos()
+    private void OnDrawGizmosSelected()
     {
         Color prevColor =  Gizmos.color;
         Gizmos.color = Color.red;

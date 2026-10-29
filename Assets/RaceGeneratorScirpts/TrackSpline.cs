@@ -1,11 +1,12 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 #if UNITY_EDITOR
 using UnityEditor;
 #endif // UNITY_EDITOR
 
-[ExecuteAlways, RequireComponent(typeof(MeshRenderer), typeof(MeshFilter))]
+[ExecuteAlways]
 public class TrackSpline : MonoBehaviour
 {
     [field: SerializeField] public Vector3 StartPoint { get; internal set; }
@@ -16,7 +17,7 @@ public class TrackSpline : MonoBehaviour
 
     private void Awake()
     {
-        mFilter = GetComponent<MeshFilter>();
+        mFilter = gameObject.GetOrAddComponent<MeshFilter>();
 
         GenerateMesh();
     }
@@ -29,7 +30,7 @@ public class TrackSpline : MonoBehaviour
         List<Vector3> verts = new();
         List<int> tris = new();
 
-        for (int i = 0; i < RENDER_SEGMENTS; i++)
+        for (int i = 0; i < RENDER_SEGMENTS + 1; i++)
         {
             float t = (float)i / RENDER_SEGMENTS;
 
@@ -44,7 +45,7 @@ public class TrackSpline : MonoBehaviour
             verts.Add(rhs);
         }
 
-        for (int i = 0; i < RENDER_SEGMENTS - 1; i++)
+        for (int i = 0; i < RENDER_SEGMENTS; i++)
         {
             int bl = i * 2;
             int br = (i * 2) + 1;
@@ -67,6 +68,24 @@ public class TrackSpline : MonoBehaviour
         };
 
         mFilter.mesh = mesh;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Color p = Gizmos.color;
+
+        Gizmos.color = new Color(1, 0, 0, 0.5f);
+        Gizmos.DrawSphere(StartPoint, 2f);
+        Gizmos.DrawSphere(EndPoint, 2f);
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawLine(StartPoint, ControlPoint);
+        Gizmos.color = Color.blue;
+        Gizmos.DrawLine(EndPoint, ControlPoint);
+        Gizmos.color = Color.purple;
+        Gizmos.DrawLine(EndPoint, EndPoint + GetDirectionAtPoint(1f) * 5f);
+        
+        Gizmos.color = p;
     }
 
     public Vector3 GetPoint(float t)
@@ -92,8 +111,8 @@ public class TrackSpline : MonoBehaviour
         float length = 0f;
         for (int i = 0; i < SEGMENTS - 1; i++)
         {
-            Vector3 start = GetPoint((float)i / (SEGMENTS - 1));
-            Vector3 end = GetPoint((float)(i + 1) / (SEGMENTS - 1));
+            Vector3 start = GetPoint((float)i / SEGMENTS);
+            Vector3 end = GetPoint((float)(i + 1) / SEGMENTS);
             length += Vector3.Distance(start, end);
         }
 

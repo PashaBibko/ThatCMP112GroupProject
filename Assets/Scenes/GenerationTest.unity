@@ -164,12 +164,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RaceGenerator
   TrackPoints:
-  - {x: 14.901099, y: 0, z: -7.727567}
-  - {x: 2.9400861, y: 0, z: 19.134048}
-  - {x: 1.0139209, y: 0, z: 16.27985}
-  - {x: -1.6277431, y: 0, z: 4.7276263}
-  - {x: -3.845075, y: 0, z: 4.1723933}
-  RandomSeed: 177226664
+  - {x: -15.346227, y: 0, z: -9.428967}
+  - {x: -12.367443, y: 0, z: -12.408662}
+  - {x: -12.913629, y: 0, z: 14.208966}
+  RandomSeed: 462391273
+  SharedMat: {fileID: 2100000, guid: 24fb8ce5898a35041a50c4e05597ccef, type: 2}
 --- !u!1 &938959136
 GameObject:
   m_ObjectHideFlags: 0
