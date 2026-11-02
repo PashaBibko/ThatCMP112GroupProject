@@ -6,18 +6,56 @@ using UnityEngine;
 using UnityEditor;
 #endif // UNITY_EDITOR
 
-[ExecuteAlways]
-public class TrackSpline : MonoBehaviour
+[System.Serializable]
+public struct Spline
 {
     [field: SerializeField] public Vector3 StartPoint { get; internal set; }
     [field: SerializeField] public Vector3 ControlPoint { get; internal set; }
     [field: SerializeField] public Vector3 EndPoint { get; internal set; }
+    
+    public Vector3 GetPoint(float t)
+    {
+        t = Mathf.Clamp01(t);
+        Vector3 l0 = Vector3.Lerp(StartPoint, ControlPoint, t);
+        Vector3 l1 = Vector3.Lerp(ControlPoint, EndPoint, t);
+        return Vector3.Lerp(l0, l1, t);
+    }
+
+    public Vector3 GetDirectionAtPoint(float t)
+    {
+        const float DELTA = 0.01f;
+        Vector3 p0 = GetPoint(t - DELTA);
+        Vector3 p1 = GetPoint(t + DELTA);
+        return (p1 - p0).normalized;
+    }
+
+    public float GetLength()
+    {
+        const int SEGMENTS = 50;
+
+        float length = 0f;
+        for (int i = 0; i < SEGMENTS - 1; i++)
+        {
+            Vector3 start = GetPoint((float)i / SEGMENTS);
+            Vector3 end = GetPoint((float)(i + 1) / SEGMENTS);
+            length += Vector3.Distance(start, end);
+        }
+
+        return length;
+    }
+}
+
+[ExecuteAlways]
+public class TrackSpline : MonoBehaviour
+{
+    [field: SerializeField] public Spline Spline { get; set; }
 
     private MeshFilter mFilter;
 
     private void Awake()
     {
         mFilter = gameObject.GetOrAddComponent<MeshFilter>();
+        gameObject.GetOrAddComponent<MeshRenderer>();
 
         GenerateMesh();
     }
@@ -34,8 +72,8 @@ public class TrackSpline : MonoBehaviour
         {
             float t = (float)i / RENDER_SEGMENTS;
 
-            Vector3 point = GetPoint(t);
-            Vector3 dir = GetDirectionAtPoint(t);
+            Vector3 point = Spline.GetPoint(t);
+            Vector3 dir = Spline.GetDirectionAtPoint(t);
             Vector3 right = Vector3.Cross(dir, Vector3.up).normalized;
 
             Vector3 lhs = point - right * TRACK_WIDTH;
@@ -75,48 +113,17 @@ public class TrackSpline : MonoBehaviour
         Color p = Gizmos.color;
 
         Gizmos.color = new Color(1, 0, 0, 0.5f);
-        Gizmos.DrawSphere(StartPoint, 2f);
-        Gizmos.DrawSphere(EndPoint, 2f);
+        Gizmos.DrawSphere(Spline.StartPoint, 2f);
+        Gizmos.DrawSphere(Spline.EndPoint, 2f);
 
         Gizmos.color = Color.yellow;
-        Gizmos.DrawLine(StartPoint, ControlPoint);
+        Gizmos.DrawLine(Spline.StartPoint, Spline.ControlPoint);
         Gizmos.color = Color.blue;
-        Gizmos.DrawLine(EndPoint, ControlPoint);
+        Gizmos.DrawLine(Spline.EndPoint, Spline.ControlPoint);
         Gizmos.color = Color.purple;
-        Gizmos.DrawLine(EndPoint, EndPoint + GetDirectionAtPoint(1f) * 5f);
+        Gizmos.DrawLine(Spline.EndPoint, Spline.EndPoint + Spline.GetDirectionAtPoint(1f) * 5f);
         
         Gizmos.color = p;
-    }
-
-    public Vector3 GetPoint(float t)
-    {
-        t = Mathf.Clamp01(t);
-        Vector3 l0 = Vector3.Lerp(StartPoint, ControlPoint, t);
-        Vector3 l1 = Vector3.Lerp(ControlPoint, EndPoint, t);
-        return Vector3.Lerp(l0, l1, t);
-    }
-
-    public Vector3 GetDirectionAtPoint(float t)
-    {
-        const float DELTA = 0.01f;
-        Vector3 p0 = GetPoint(t - DELTA);
-        Vector3 p1 = GetPoint(t + DELTA);
-        return (p1 - p0).normalized;
-    }
-
-    public float GetLength()
-    {
-        const int SEGMENTS = 50;
-
-        float length = 0f;
-        for (int i = 0; i < SEGMENTS - 1; i++)
-        {
-            Vector3 start = GetPoint((float)i / SEGMENTS);
-            Vector3 end = GetPoint((float)(i + 1) / SEGMENTS);
-            length += Vector3.Distance(start, end);
-        }
-
-        return length;
     }
 }
 

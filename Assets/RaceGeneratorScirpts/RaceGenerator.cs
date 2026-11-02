@@ -1,8 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using Vector2 = UnityEngine.Vector2;
@@ -15,7 +12,6 @@ using UnityEditor;
 
 public class RaceGenerator : MonoBehaviour
 {
-    [SerializeField] private List<Vector3> TrackPoints = new();
     [SerializeField] private int RandomSeed = 23117;
     [SerializeField] private Material SharedMat;
 
@@ -26,31 +22,24 @@ public class RaceGenerator : MonoBehaviour
         public float Distance;
     }
 
-    private static Vector2 TryGetControlPoint(Vector2 start, Vector2 end, Vector2 dir, out bool backwards)
+    private static Vector2? TryGetControlPoint(Vector2 start, Vector2 end, Vector2 dir)
     {
-        backwards = false;
-        
         Vector2 normal = end - start;
         Vector2 mid = (start + end) * 0.5f;
         
         float dot = Vector2.Dot(dir, normal);
         if (Mathf.Abs(dot) < Mathf.Epsilon) // Bisector is parallel
-            throw new InvalidOperationException("Uhh FUCK");
+            return null;
 
         float t = Vector2.Dot(mid - start, normal) / dot;
-        if (t < 0f) // Intersection is behind
-            backwards = true;
+        if (t is > 0f and < 50f)
+            return start + dir * t;
 
-        return start + dir * t;
+        return null;
     }
 
-    public void GenerateNewTrack()
+    private void ClearPreviousTrackGameObjects()
     {
-        Random.InitState(RandomSeed);
-        
-        const int TRACK_POINTS = 6;
-        TrackPoints.Clear();
-
         List<GameObject> children = new();
         foreach (Transform child in transform)
         {
@@ -68,108 +57,71 @@ public class RaceGenerator : MonoBehaviour
 #endif // UNITY_EDITOR
             Destroy(child);
         }
+    }
 
-        List<Vector2> unsortedPoints = new();
-        for (int i = 0; i < TRACK_POINTS; i++)
-        {
-            Vector2 point = Random.insideUnitCircle * 20f;
-            unsortedPoints.Add(new Vector2(point.x, point.y));
-        }
-
-        List<PolarCoord> polarCoords = new();
-        foreach (Vector2 point in unsortedPoints)
-        {
-            float angle = Mathf.Atan2(point.y, point.x);
-            float distance = Mathf.Clamp(new Vector2(point.x, point.y).magnitude, 5f, 20f);
-
-            polarCoords.Add(new PolarCoord
-            {
-                Angle = angle,
-                Distance = distance,
-            });
-        }
-
-        IOrderedEnumerable<PolarCoord> sortedPolar = polarCoords.OrderBy(coord => coord.Angle);
+    public void GenerateNewTrack()
+    {
+        const int TRACK_POINTS = 10;
         
-        foreach (PolarCoord coord in sortedPolar)
-            TrackPoints.Add(new Vector3(
-                Mathf.Cos(coord.Angle) * coord.Distance,
-                0f,
-                Mathf.Sin(coord.Angle) * coord.Distance)
-            );
+        ClearPreviousTrackGameObjects();
+        Random.InitState(RandomSeed);
+
+        List<Spline> splines = new();
         
-        //
-        Vector3? lastEndDirection = null;
-        for (int i = 0; i < TrackPoints.Count - 1; i++)
+        bool createdLoopedTrack = false;
+        int iterations = 0;
+
+        while (!createdLoopedTrack && iterations < 100)
         {
-            GameObject go = new("TrackSection-" + i);
-            go.transform.SetParent(transform);
+            splines.Clear();
+            Debug.Log("Iteration: " + iterations);
+            iterations++;
             
-            go.GetOrAddComponent<MeshRenderer>().sharedMaterial = SharedMat;
-            
-            Vector3 start = TrackPoints[i];
-            Vector3 end = TrackPoints[i + 1];
+            Vector2 start = Vector2.zero;
+            Vector2 dir = Vector2.up;
 
-            TrackSpline spline = go.AddComponent<TrackSpline>();
-            spline.StartPoint = start;
-            spline.EndPoint = end;
-
-            if (lastEndDirection == null)
+            for (int i = 0; i < TRACK_POINTS; i++)
             {
-                spline.ControlPoint = (start + end) * 0.5f;
-                Debug.Log("Used default ControlPoint");
-            }
-            else
-            {
-                Vector3 controlPoint = TryGetControlPoint
-                (
-                    new Vector2(start.x, start.z),
-                    new Vector2(end.x, end.z),
-                    new Vector2(lastEndDirection.Value.x, lastEndDirection.Value.z),
-                    out bool isBackwards
-                );
+                Vector2 end = Vector2.zero;
+                Vector2? control = null;
 
-                if (!isBackwards)
+                while (!control.HasValue)
                 {
-                    spline.ControlPoint = new Vector3(controlPoint.x, 0f, controlPoint.y);
+                    end = start + Random.insideUnitCircle.normalized * 50f;
+                    control = TryGetControlPoint(start, end, dir);
                 }
                 
-                else
+                splines.Add(new Spline
                 {
-                    GameObject flipA = new("TrackFlip-A-OfSection-" + i);
-                    flipA.GetOrAddComponent<MeshRenderer>().sharedMaterial = SharedMat;
-                    flipA.transform.SetParent(transform);
-                    TrackSpline flipSplineA = flipA.AddComponent<TrackSpline>();
-                    
-                    GameObject flipB = new("TrackFlip-A-OfSection-" + i);
-                    flipB.GetOrAddComponent<MeshRenderer>().sharedMaterial = SharedMat;
-                    flipB.transform.SetParent(transform);
-                    TrackSpline flipSplineB = flipB.AddComponent<TrackSpline>();
+                    StartPoint = new Vector3(start.x, 0f, start.y),
+                    ControlPoint = new Vector3(control.Value.x, 0f, control.Value.y),
+                    EndPoint = new Vector3(end.x, 0f, end.y)
+                });
 
-                    Vector3 curveStart = start;
-                    Vector3 curveEnd = start + Vector3.up * 20f;
-                    Vector3 curveMid = start + lastEndDirection.Value * 10f + Vector3.up * 10f;
-                    Vector3 curveControlA = curveStart + lastEndDirection.Value * 10f;
-                    Vector3 curveControlB = curveEnd + lastEndDirection.Value * 10f;
-                    
-                    flipSplineA.StartPoint = curveStart;
-                    flipSplineA.ControlPoint = curveControlA;
-                    flipSplineA.EndPoint = curveMid;
-                    flipSplineA.GenerateMesh();
+                Vector3 dir3D = splines[^1].GetDirectionAtPoint(1f);
+                dir = new Vector2(dir3D.x, dir3D.z);
+                start = end;
 
-                    flipSplineB.StartPoint = curveMid;
-                    flipSplineB.ControlPoint = curveControlB;
-                    flipSplineB.EndPoint = curveEnd;
-                    flipSplineB.GenerateMesh();
-
-                    spline.StartPoint = curveEnd;
-                    spline.ControlPoint = new Vector3(controlPoint.x, spline.StartPoint.y, controlPoint.y);
-                    spline.EndPoint = new Vector3(spline.EndPoint.x, curveEnd.y, spline.EndPoint.z);
+                //
+                if (i > TRACK_POINTS / 2f)
+                {
                 }
             }
 
-            lastEndDirection = spline.GetDirectionAtPoint(1f).normalized;
-            spline.GenerateMesh();
+            createdLoopedTrack = true;
+        }
+
+        if (createdLoopedTrack)
+        {
+            foreach (Spline spline in splines)
+            {
+                GameObject track = new("Track");
+                track.transform.SetParent(transform);
+
+                TrackSpline trackSpline = track.AddComponent<TrackSpline>();
+                trackSpline.Spline = spline;
+                trackSpline.GenerateMesh();
+            }
         }
 
 #if UNITY_EDITOR
@@ -183,26 +135,6 @@ public class RaceGenerator : MonoBehaviour
 #if UNITY_EDITOR
         EditorUtility.SetDirty(this);
 #endif // UNITY_EDITOR
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        Color prevColor =  Gizmos.color;
-        Gizmos.color = Color.red;
-
-        Vector3? previous = null;
-        foreach (Vector3 point in TrackPoints)
-        {
-            if (previous != null)
-                Gizmos.DrawLine((Vector3)previous, point);
-            
-            Gizmos.DrawSphere(point, 2f);
-            previous = point;
-            
-            Gizmos.color = new Color(1f, 0f, 1f, 0.5f);
-        }
-
-        Gizmos.color = prevColor; 
     }
 }
 
