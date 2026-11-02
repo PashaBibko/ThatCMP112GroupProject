@@ -2,13 +2,10 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
-using Vector2 = UnityEngine.Vector2;
-using Vector3 = UnityEngine.Vector3;
 
 #if UNITY_EDITOR
 using UnityEditor;
 #endif // UNITY_EDITOR
-
 
 public class RaceGenerator : MonoBehaviour
 {
@@ -32,9 +29,24 @@ public class RaceGenerator : MonoBehaviour
             return null;
 
         float t = Vector2.Dot(mid - start, normal) / dot;
-        if (t is > 0f and < 50f)
+        if (t is > 15f and < 50f) // Stops the splines from curving back, or being too long
             return start + dir * t;
 
+        return null;
+    }
+
+    private static Vector2? TryGetControlPoint(Vector2 start, Vector2 startDir, Vector2 end, Vector2 endDir)
+    {
+        float cross = startDir.x * endDir.y - startDir.y * endDir.x;
+        if (Mathf.Abs(cross) < 1e-4f) // Tangents are parallel
+            return null;
+
+        Vector2 d = end - start;
+        float t = (d.x * endDir.y - d.y * endDir.x) / cross;
+        float s = (startDir.x * d.y - startDir.y * d.x) / cross;
+        if (t is > 15f and < 50f && s is > 15f and < 50f) // Stops the splines from curving back, or being too long
+            return start + startDir * t;
+        
         return null;
     }
 
@@ -71,10 +83,9 @@ public class RaceGenerator : MonoBehaviour
         bool createdLoopedTrack = false;
         int iterations = 0;
 
-        while (!createdLoopedTrack && iterations < 100)
+        while (!createdLoopedTrack && iterations < 1000)
         {
             splines.Clear();
-            Debug.Log("Iteration: " + iterations);
             iterations++;
             
             Vector2 start = Vector2.zero;
@@ -105,12 +116,35 @@ public class RaceGenerator : MonoBehaviour
                 //
                 if (i > TRACK_POINTS / 2f)
                 {
+                    Vector2 gate = new(0f, -50f);
+
+                    Vector2? finalControlPoint = TryGetControlPoint(start, dir.normalized, gate, Vector2.up);
+                    if (!finalControlPoint.HasValue)
+                        continue;
+
+                    Spline endSplineA = new()
+                    {
+                        StartPoint = new Vector3(start.x, 0f, start.y),
+                        ControlPoint = new Vector3(finalControlPoint.Value.x, 0f, finalControlPoint.Value.y),
+                        EndPoint = new Vector3(gate.x, 0f, gate.y)
+                    };
+
+                    Spline endSplineB = new()
+                    {
+                        StartPoint = new Vector3(gate.x, 0f, gate.y),
+                        ControlPoint = new Vector3(0f, 0f, -12.5f),
+                        EndPoint = Vector3.zero
+                    };
+
+                    createdLoopedTrack = true;
+                    splines.Add(endSplineA);
+                    splines.Add(endSplineB);
+                    break;
                 }
             }
-
-            createdLoopedTrack = true;
         }
 
+        Debug.Log($"Generation took {iterations} iterations");
         if (createdLoopedTrack)
         {
             foreach (Spline spline in splines)
@@ -120,7 +154,7 @@ public class RaceGenerator : MonoBehaviour
 
                 TrackSpline trackSpline = track.AddComponent<TrackSpline>();
                 trackSpline.Spline = spline;
-                trackSpline.GenerateMesh();
+                trackSpline.GenerateMesh(SharedMat);
             }
         }
 

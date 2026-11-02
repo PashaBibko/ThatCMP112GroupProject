@@ -56,11 +56,9 @@ public class TrackSpline : MonoBehaviour
     {
         mFilter = gameObject.GetOrAddComponent<MeshFilter>();
         gameObject.GetOrAddComponent<MeshRenderer>();
-
-        GenerateMesh();
     }
 
-    internal void GenerateMesh()
+    internal void GenerateMesh(Material mat)
     {
         const int RENDER_SEGMENTS = 25;
         const int TRACK_WIDTH = 5;
@@ -105,6 +103,7 @@ public class TrackSpline : MonoBehaviour
             triangles = tris.ToArray(),
         };
 
+        transform.GetComponent<MeshRenderer>().sharedMaterial = mat;
         mFilter.mesh = mesh;
     }
 
@@ -126,20 +125,3 @@ public class TrackSpline : MonoBehaviour
         Gizmos.color = p;
     }
 }
-
-#if UNITY_EDITOR
-
-[CustomEditor(typeof(TrackSpline))]
-public class TrackSplineEditor : Editor
-{
-    public override void OnInspectorGUI()
-    {
-        DrawDefaultInspector();
-
-        GUILayout.Space(10f);
-        if (GUILayout.Button("Regenerate Mesh"))
-            (target as TrackSpline)!.GenerateMesh();
-    }
-}
-
-#endif // UNITY_EDITOR
