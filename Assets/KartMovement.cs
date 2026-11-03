@@ -7,12 +7,9 @@ public class KartMovement : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private Rigidbody rb;
-    public WheelCollider FrontWheelL;
-    public GameObject[] Wheels;
     public float Speed;
-    public float TiltStrength;
     public float TurnStrength;
-    public float DownStrength;
+    public float RotSmoothing;
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -23,13 +20,20 @@ public class KartMovement : MonoBehaviour
     {
         float VInput = Input.GetAxis("Vertical");
         float HInput = Input.GetAxis("Horizontal");
-        float speed = rb.linearVelocity.magnitude;
+        float Currentspeed = rb.linearVelocity.magnitude * 75;
 
-        
+        Currentspeed = Mathf.Clamp(Currentspeed,-300,1600);
 
-        rb.AddForce(transform.forward * VInput * Speed);
-        rb.AddForce(-transform.up * DownStrength);
-        KartRotations(HInput, speed);
+        if(VInput < 0)
+        {
+            Currentspeed = Currentspeed * -1;
+        }
+        else
+        {
+            Currentspeed = Mathf.Abs(Currentspeed);
+        }
+        rb.AddForce(transform.forward * VInput * (Speed + Currentspeed));
+        KartRotations(HInput, rb.linearVelocity.magnitude);
         
 
     }
@@ -48,18 +52,17 @@ public class KartMovement : MonoBehaviour
         {
             xRot -= 360;
         }
-
+        //limit the x rotation to stop car from flipping
         xRot = Mathf.Clamp(xRot, -50f, 50f);
 
         
 
         transform.rotation = Quaternion.Euler(xRot,transform.eulerAngles.y,0);
-        
-        //this is  for if the car is in midair or if it ends up fucked up somehow -- it rotates it facing straight up;
-        if(!Physics.Raycast(transform.position,-transform.up,2))
+        //this is  for if the car is in midair or if it ends up flipped up somehow -- it rotates it facing straight up;
+        if (!Physics.Raycast(transform.position,-transform.up,2))
         {
-            Quaternion rotationTarget = Quaternion.Euler(0, transform.rotation.y, 0);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation,rotationTarget, Time.deltaTime);
+            Quaternion rotationTarget = Quaternion.Euler(0, transform.eulerAngles.y, 0);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation,rotationTarget,RotSmoothing);
         }
         
     }
