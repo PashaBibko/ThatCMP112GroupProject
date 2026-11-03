@@ -7,7 +7,6 @@ public class WheelBehaviour : MonoBehaviour
     public float RestLength = 0.5f;
     public float SpringStrength = 3000f;
     public float DamperStrength = 500f;
-
     private Rigidbody rb;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -34,8 +33,13 @@ public class WheelBehaviour : MonoBehaviour
             Vector3 localvelocity = transform.InverseTransformDirection(rb.linearVelocity);
             localvelocity.x *= 0.9f;
             rb.linearVelocity = transform.TransformDirection(localvelocity);
+            Debug.DrawRay(transform.position, -transform.up, Color.red);
+
         }
 
 
+        
+
+     
     }
 }
