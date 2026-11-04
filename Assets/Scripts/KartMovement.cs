@@ -1,52 +1,40 @@
-using System.Collections;
-using Unity.VisualScripting;
-using UnityEditor.ShaderGraph;
 using UnityEngine;
 
 public class KartMovement : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    private Rigidbody rb;
+    private Rigidbody mRigidbody;
     public float Speed;
     public float TurnStrength;
     public float RotSmoothing;
-    void Start()
+
+    private void Start()
     {
-        rb = GetComponent<Rigidbody>();
+        mRigidbody = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    private void FixedUpdate()
     {
-        float VInput = Input.GetAxis("Vertical");
-        float HInput = Input.GetAxis("Horizontal");
-        float Currentspeed = rb.linearVelocity.magnitude * 75;
+        float vInput = Input.GetAxis("Vertical");
+        float hInput = Input.GetAxis("Horizontal");
+        float currentSpeed = mRigidbody.linearVelocity.magnitude * 75;
+        currentSpeed = Mathf.Clamp(currentSpeed,-300,1600);
 
-        Currentspeed = Mathf.Clamp(Currentspeed,-300,1600);
-
-        if(VInput < 0)
-        {
-            Currentspeed = Currentspeed * -1;
-        }
+        if(vInput < 0)
+            currentSpeed *= -1;
         else
-        {
-            Currentspeed = Mathf.Abs(Currentspeed);
-        }
+            currentSpeed = Mathf.Abs(currentSpeed);
 
-        Debug.Log("CurrentSpeed: " + Currentspeed);
-        Debug.Log("VInput: " + VInput);
-        rb.AddForce(transform.forward * VInput * (Speed + Currentspeed));
-        KartRotations(HInput, rb.linearVelocity.magnitude);
-        
-
+        Debug.Log("CurrentSpeed: " + currentSpeed);
+        Debug.Log("VInput: " + vInput);
+        mRigidbody.AddForce(transform.forward * (vInput * (Speed + currentSpeed)));
+        KartRotations(hInput, mRigidbody.linearVelocity.magnitude);
     }
 
-
-
-    void KartRotations(float input, float speed)
+    private void KartRotations(float input, float speed)
     {
-
-        //rotates the car towards player input - clamp speed so cars turining speed is limited
+        //rotates the car towards player input - clamp speed so cars turning speed is limited
         speed = Mathf.Clamp(speed, 0, 8);
         transform.Rotate(0, input * TurnStrength * speed, 0);
 
@@ -58,16 +46,12 @@ public class KartMovement : MonoBehaviour
         //limit the x rotation to stop car from flipping
         xRot = Mathf.Clamp(xRot, -50f, 50f);
 
-        
-
         transform.rotation = Quaternion.Euler(xRot,transform.eulerAngles.y,0);
-        //this is  for if the car is in midair or if it ends up flipped up somehow -- it rotates it facing straight up;
+        //this is  for if the car is in midair or if it ends flipped up somehow - it rotates it facing straight up;
         if (!Physics.Raycast(transform.position,-transform.up,2))
         {
             Quaternion rotationTarget = Quaternion.Euler(0, transform.eulerAngles.y, 0);
             transform.rotation = Quaternion.RotateTowards(transform.rotation,rotationTarget,RotSmoothing);
         }
-        
     }
-
 }
