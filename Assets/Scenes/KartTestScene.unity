@@ -1386,6 +1386,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerKart
       objectReference: {fileID: 0}
+    - target: {fileID: 3585275320856473909, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
+      propertyPath: Speed
+      value: 10000
+      objectReference: {fileID: 0}
+    - target: {fileID: 3585275320856473909, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
+      propertyPath: TurnStrength
+      value: 0.08
+      objectReference: {fileID: 0}
     - target: {fileID: 6878205951037251584, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

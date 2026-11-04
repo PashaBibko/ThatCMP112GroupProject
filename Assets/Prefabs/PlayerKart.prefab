@@ -99,8 +99,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb59d050ccb46a749a224b5c7c51590e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KartMovement
-  Speed: 1000
-  TurnStrength: 0.01
+  Speed: 10000
+  TurnStrength: 0.08
   RotSmoothing: 1
 --- !u!1 &3209378466602282919
 GameObject:

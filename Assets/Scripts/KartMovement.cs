@@ -16,7 +16,7 @@ public class KartMovement : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         float VInput = Input.GetAxis("Vertical");
         float HInput = Input.GetAxis("Horizontal");
@@ -32,6 +32,9 @@ public class KartMovement : MonoBehaviour
         {
             Currentspeed = Mathf.Abs(Currentspeed);
         }
+
+        Debug.Log("CurrentSpeed: " + Currentspeed);
+        Debug.Log("VInput: " + VInput);
         rb.AddForce(transform.forward * VInput * (Speed + Currentspeed));
         KartRotations(HInput, rb.linearVelocity.magnitude);
         
