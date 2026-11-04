@@ -91,6 +91,8 @@ public class RaceGenerator : MonoBehaviour
             Vector2 start = Vector2.zero;
             Vector2 dir = Vector2.up;
 
+            float height = 0f;
+
             for (int i = 0; i < TRACK_POINTS; i++)
             {
                 if (Random.value > 0.2f)
@@ -106,9 +108,9 @@ public class RaceGenerator : MonoBehaviour
 
                     splines.Add(new Spline
                     {
-                        StartPoint = new Vector3(start.x, 0f, start.y),
-                        ControlPoint = new Vector3(control.Value.x, 0f, control.Value.y),
-                        EndPoint = new Vector3(end.x, 0f, end.y)
+                        StartPoint = new Vector3(start.x, height, start.y),
+                        ControlPoint = new Vector3(control.Value.x, height, control.Value.y),
+                        EndPoint = new Vector3(end.x, height, end.y)
                     });
 
                     Vector3 dir3D = splines[^1].GetDirectionAtPoint(1f);
@@ -118,46 +120,77 @@ public class RaceGenerator : MonoBehaviour
                     //
                     if (i > TRACK_POINTS / 2f)
                     {
-                        Vector2 gate = new(0f, -50f);
+                        Vector2 gate = new(0f, -80f);
+                        Vector2 slopeControl1 = new(0f, -65f);
+                        Vector2 slopeMid = new(0f, -50f);
+                        Vector2 slopeControl2 = new(0f, -35f);
+                        Vector2 startGrid = new(0f, -20f);
 
                         Vector2? finalControlPoint = TryGetControlPoint(start, dir.normalized, gate, Vector2.up);
                         if (!finalControlPoint.HasValue)
                             continue;
 
-                        Spline endSplineA = new()
+                        // Curve to the gate
+                        splines.Add(new Spline
                         {
-                            StartPoint = new Vector3(start.x, 0f, start.y),
-                            ControlPoint = new Vector3(finalControlPoint.Value.x, 0f, finalControlPoint.Value.y),
-                            EndPoint = new Vector3(gate.x, 0f, gate.y)
-                        };
+                            StartPoint = new Vector3(start.x, height, start.y),
+                            ControlPoint = new Vector3(finalControlPoint.Value.x, height, finalControlPoint.Value.y),
+                            EndPoint = new Vector3(gate.x, height, gate.y)
+                        });
 
-                        Spline endSplineB = new()
+                        // Gate to midway through slope
+                        splines.Add(new Spline
                         {
-                            StartPoint = new Vector3(gate.x, 0f, gate.y),
-                            ControlPoint = new Vector3(0f, 0f, -12.5f),
+                            StartPoint = new Vector3(gate.x, height, gate.y),
+                            ControlPoint = new Vector3(slopeControl1.x, height, slopeControl1.y),
+                            EndPoint = new Vector3(slopeMid.x, height / 2f, slopeMid.y)
+                        });
+                        
+                        // Midway through slope to start grid
+                        splines.Add(new Spline
+                        {
+                            StartPoint = new Vector3(slopeMid.x, height / 2f, slopeMid.y),
+                            ControlPoint = new Vector3(slopeControl2.x, 0f, slopeControl2.y),
+                            EndPoint = new Vector3(startGrid.x, 0f, startGrid.y)
+                        });
+                        
+                        // Start grid to start
+                        splines.Add(new Spline
+                        {
+                            StartPoint = new Vector3(startGrid.x, 0f, startGrid.y),
+                            ControlPoint = Vector3.zero,
                             EndPoint = Vector3.zero
-                        };
+                        });
 
                         createdLoopedTrack = true;
-                        splines.Add(endSplineA);
-                        splines.Add(endSplineB);
                         break;
                     }
                 }
                 
                 else
                 {
-                    Vector2 end = start + dir.normalized * 50f;
-                    Vector2 control = (start + end) / 2f;
+                    float newHeight = Random.value * 100f;
+                    
+                    Vector2 control1 = start + dir.normalized * 15f;
+                    Vector2 midpoint = start + dir.normalized * 30f;
+                    Vector2 control2 = start + dir.normalized * 45f;
+                    Vector2 end = start + dir.normalized * 60f;
 
-                    Spline spline = new()
+                    splines.Add(new Spline
                     {
-                        StartPoint = new Vector3(start.x, 0f, start.y),
-                        ControlPoint = new Vector3(control.x, 0f, control.y),
-                        EndPoint = new Vector3(end.x, 0f, end.y)
-                    };
-                    splines.Add(spline);
+                        StartPoint = new Vector3(start.x, height, start.y),
+                        ControlPoint = new Vector3(control1.x, height, control1.y),
+                        EndPoint = new Vector3(midpoint.x, (height + newHeight) / 2f, midpoint.y)
+                    });
+                    
+                    splines.Add(new Spline
+                    {
+                        StartPoint = new Vector3(midpoint.x, (height + newHeight) / 2f, midpoint.y),
+                        ControlPoint = new Vector3(control2.x, newHeight, control2.y),
+                        EndPoint = new Vector3(end.x, newHeight, end.y)
+                    });
 
+                    height = newHeight;
                     start = end;
                 }
             }
