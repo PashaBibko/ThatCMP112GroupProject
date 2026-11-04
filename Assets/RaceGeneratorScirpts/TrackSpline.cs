@@ -2,10 +2,6 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif // UNITY_EDITOR
-
 [System.Serializable]
 public struct Spline
 {
@@ -50,14 +46,15 @@ public class TrackSpline : MonoBehaviour
 {
     [field: SerializeField] public Spline Spline { get; set; }
 
+    private MeshCollider mCollider;
     private MeshFilter mFilter;
 
     private void Awake()
     {
+        mCollider = gameObject.GetOrAddComponent<MeshCollider>();
         mFilter = gameObject.GetOrAddComponent<MeshFilter>();
         
         gameObject.GetOrAddComponent<MeshRenderer>();
-        gameObject.GetOrAddComponent<MeshCollider>();
     }
 
     internal void GenerateMesh(Material mat)
@@ -106,6 +103,8 @@ public class TrackSpline : MonoBehaviour
         };
 
         transform.GetComponent<MeshRenderer>().sharedMaterial = mat;
+        
+        mCollider.sharedMesh = mesh;
         mFilter.mesh = mesh;
     }
 
