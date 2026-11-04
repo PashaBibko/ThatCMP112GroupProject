@@ -55,7 +55,9 @@ public class TrackSpline : MonoBehaviour
     private void Awake()
     {
         mFilter = gameObject.GetOrAddComponent<MeshFilter>();
+        
         gameObject.GetOrAddComponent<MeshRenderer>();
+        gameObject.GetOrAddComponent<MeshCollider>();
     }
 
     internal void GenerateMesh(Material mat)
