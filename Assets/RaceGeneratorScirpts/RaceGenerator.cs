@@ -93,53 +93,72 @@ public class RaceGenerator : MonoBehaviour
 
             for (int i = 0; i < TRACK_POINTS; i++)
             {
-                Vector2 end = Vector2.zero;
-                Vector2? control = null;
-
-                while (!control.HasValue)
+                if (Random.value > 0.2f)
                 {
-                    end = start + Random.insideUnitCircle.normalized * 50f;
-                    control = TryGetControlPoint(start, end, dir);
-                }
-                
-                splines.Add(new Spline
-                {
-                    StartPoint = new Vector3(start.x, 0f, start.y),
-                    ControlPoint = new Vector3(control.Value.x, 0f, control.Value.y),
-                    EndPoint = new Vector3(end.x, 0f, end.y)
-                });
+                    Vector2 end = Vector2.zero;
+                    Vector2? control = null;
 
-                Vector3 dir3D = splines[^1].GetDirectionAtPoint(1f);
-                dir = new Vector2(dir3D.x, dir3D.z);
-                start = end;
+                    while (!control.HasValue)
+                    {
+                        end = start + Random.insideUnitCircle.normalized * 50f;
+                        control = TryGetControlPoint(start, end, dir);
+                    }
 
-                //
-                if (i > TRACK_POINTS / 2f)
-                {
-                    Vector2 gate = new(0f, -50f);
-
-                    Vector2? finalControlPoint = TryGetControlPoint(start, dir.normalized, gate, Vector2.up);
-                    if (!finalControlPoint.HasValue)
-                        continue;
-
-                    Spline endSplineA = new()
+                    splines.Add(new Spline
                     {
                         StartPoint = new Vector3(start.x, 0f, start.y),
-                        ControlPoint = new Vector3(finalControlPoint.Value.x, 0f, finalControlPoint.Value.y),
-                        EndPoint = new Vector3(gate.x, 0f, gate.y)
-                    };
+                        ControlPoint = new Vector3(control.Value.x, 0f, control.Value.y),
+                        EndPoint = new Vector3(end.x, 0f, end.y)
+                    });
 
-                    Spline endSplineB = new()
+                    Vector3 dir3D = splines[^1].GetDirectionAtPoint(1f);
+                    dir = new Vector2(dir3D.x, dir3D.z);
+                    start = end;
+
+                    //
+                    if (i > TRACK_POINTS / 2f)
                     {
-                        StartPoint = new Vector3(gate.x, 0f, gate.y),
-                        ControlPoint = new Vector3(0f, 0f, -12.5f),
-                        EndPoint = Vector3.zero
-                    };
+                        Vector2 gate = new(0f, -50f);
 
-                    createdLoopedTrack = true;
-                    splines.Add(endSplineA);
-                    splines.Add(endSplineB);
-                    break;
+                        Vector2? finalControlPoint = TryGetControlPoint(start, dir.normalized, gate, Vector2.up);
+                        if (!finalControlPoint.HasValue)
+                            continue;
+
+                        Spline endSplineA = new()
+                        {
+                            StartPoint = new Vector3(start.x, 0f, start.y),
+                            ControlPoint = new Vector3(finalControlPoint.Value.x, 0f, finalControlPoint.Value.y),
+                            EndPoint = new Vector3(gate.x, 0f, gate.y)
+                        };
+
+                        Spline endSplineB = new()
+                        {
+                            StartPoint = new Vector3(gate.x, 0f, gate.y),
+                            ControlPoint = new Vector3(0f, 0f, -12.5f),
+                            EndPoint = Vector3.zero
+                        };
+
+                        createdLoopedTrack = true;
+                        splines.Add(endSplineA);
+                        splines.Add(endSplineB);
+                        break;
+                    }
+                }
+                
+                else
+                {
+                    Vector2 end = start + dir.normalized * 50f;
+                    Vector2 control = (start + end) / 2f;
+
+                    Spline spline = new()
+                    {
+                        StartPoint = new Vector3(start.x, 0f, start.y),
+                        ControlPoint = new Vector3(control.x, 0f, control.y),
+                        EndPoint = new Vector3(end.x, 0f, end.y)
+                    };
+                    splines.Add(spline);
+
+                    start = end;
                 }
             }
         }
@@ -181,12 +200,16 @@ public class RaceGeneratorEditor : Editor
     {
         RaceGenerator generator = (target as RaceGenerator)!;
         DrawDefaultInspector();
-        
+
         GUILayout.Space(10f);
         if (GUILayout.Button("Generate"))
             generator.GenerateNewTrack();
-        if (GUILayout.Button("Get new random seed"))
+        
+        if (GUILayout.Button("Get new random track"))
+        {
             generator.NewRandomSeed();
+            generator.GenerateNewTrack();
+        }
     }
 }
 
