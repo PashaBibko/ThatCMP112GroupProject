@@ -17,23 +17,18 @@ public class WheelBehaviour : MonoBehaviour
     // Update is called once per frame
     private void FixedUpdate()
     {
-        float velocity = Vector3.Dot(mRigidbody.GetPointVelocity(transform.position), transform.up);
-        
-        //Raycast down towards ground
-        if(Physics.Raycast(transform.position,-transform.up,out RaycastHit hit,RayCastDistance))
+        // Raycast down towards ground
+        if (Physics.Raycast(transform.position, -transform.up, out RaycastHit hit, RayCastDistance))
         {
-            //compression is the distance between how far the ray goes in the ground and where the ray likes to rest;
+            float velocity = Vector3.Dot(mRigidbody.GetPointVelocity(transform.position), hit.normal);
+        
+            // Compression is the distance between how far the ray goes in the ground and where the ray likes to rest;
             float compression = RestLength - hit.distance;
             float springForce = (compression * SpringStrength) - velocity * DamperStrength;
             mRigidbody.AddForceAtPosition(transform.up * springForce, transform.position);
-
-            //wheel grip
-
-            //translate world velocity into local - xyz
-            Vector3 localVelocity = transform.InverseTransformDirection(mRigidbody.linearVelocity);
             
-            //make z velocity smaller - tire grip
-            localVelocity.x *= 0.9f;
+            // Translate world velocity into local - xyz
+            Vector3 localVelocity = transform.InverseTransformDirection(mRigidbody.linearVelocity) * 0.9f;
             mRigidbody.linearVelocity = transform.TransformDirection(localVelocity);
 
             Debug.DrawRay(transform.position, -transform.up, Color.red);
