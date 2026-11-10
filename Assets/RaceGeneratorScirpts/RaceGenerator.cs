@@ -16,8 +16,10 @@ public class RaceGenerator : MonoBehaviour
     [SerializeField] private float HeightRange = 100f;
     [SerializeField] private float TrackSectionLength = 50f;
     [SerializeField] private uint MaxGenerationIterations = 10_000;
+    [SerializeField] private uint MaxGeneratedBuildings = 1000;
     
     [Header("References")]
+    [SerializeField] private GameObject BuildingPrefab;
     [SerializeField] private Material SharedMat;
 
     [Serializable]
@@ -205,14 +207,55 @@ public class RaceGenerator : MonoBehaviour
         Debug.Log($"Generation took {iterations} iterations");
         if (createdLoopedTrack)
         {
+            float minX = float.MaxValue;
+            float minY = float.MaxValue;
+            
+            float maxX = float.MinValue;
+            float maxY = float.MinValue;
+            
             foreach (Spline spline in splines)
             {
+                minX = Mathf.Min(minX, spline.ControlPoint.x);
+                minX = Mathf.Min(minX, spline.StartPoint.x);
+                minX = Mathf.Min(minX, spline.EndPoint.x);
+                
+                maxX = Mathf.Max(maxX, spline.ControlPoint.x);
+                maxX = Mathf.Max(maxX, spline.StartPoint.x);
+                maxX = Mathf.Max(maxX, spline.EndPoint.x);
+                
+                minY = Mathf.Min(minY, spline.ControlPoint.z);
+                minY = Mathf.Min(minY, spline.StartPoint.z);
+                minY = Mathf.Min(minY, spline.EndPoint.z);
+                
+                maxY = Mathf.Max(maxY, spline.ControlPoint.z);
+                maxY = Mathf.Max(maxY, spline.StartPoint.z);
+                maxY = Mathf.Max(maxY, spline.EndPoint.z);
+                
                 GameObject track = new("Track");
                 track.transform.SetParent(transform);
 
                 TrackSpline trackSpline = track.AddComponent<TrackSpline>();
                 trackSpline.Spline = spline;
                 trackSpline.GenerateMesh(SharedMat);
+            }
+
+            for (int i = 0; i < MaxGeneratedBuildings; i++)
+            {
+                Vector2 pos = new
+                (
+                    Random.Range(minX - 150f, maxX + 150f),
+                    Random.Range(minY - 150f, maxY + 150f)
+                );
+
+                float h = Random.Range(0f, HeightRange + 100f);
+                
+                bool hit = Physics.BoxCast(new Vector3(pos.x, h + 25f, pos.y), Vector3.one * 15f, Vector3.down);
+
+                if (!hit)
+                {
+                    GameObject go = Instantiate(BuildingPrefab, transform, true);
+                    go.transform.position = new Vector3(pos.x, h, pos.y);
+                }
             }
         }
 

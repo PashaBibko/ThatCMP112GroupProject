@@ -169,6 +169,8 @@ MonoBehaviour:
   HeightRange: 50
   TrackSectionLength: 50
   MaxGenerationIterations: 10000
+  MaxGeneratedBuildings: 500
+  BuildingPrefab: {fileID: 7917237545102839342, guid: 116141977f0fc4f2ca741364ee80cbe7, type: 3}
   SharedMat: {fileID: 2100000, guid: 24fb8ce5898a35041a50c4e05597ccef, type: 2}
 --- !u!1 &938959136
 GameObject:
