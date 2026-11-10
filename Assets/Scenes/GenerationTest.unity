@@ -163,7 +163,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7a117502d00c8d46a6d02ae8ade72bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RaceGenerator
-  RandomSeed: 1550243548
+  RandomSeed: 193687934
+  TrackPoints: 25
+  SlopeChance: 0.7
+  HeightRange: 50
+  TrackSectionLength: 50
+  MaxGenerationIterations: 10000
   SharedMat: {fileID: 2100000, guid: 24fb8ce5898a35041a50c4e05597ccef, type: 2}
 --- !u!1 &938959136
 GameObject:

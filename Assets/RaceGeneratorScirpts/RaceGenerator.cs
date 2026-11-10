@@ -9,7 +9,15 @@ using UnityEditor;
 
 public class RaceGenerator : MonoBehaviour
 {
+    [Header("Settings")]
     [SerializeField] private int RandomSeed = 23117;
+    [SerializeField] private uint TrackPoints = 10;
+    [SerializeField, Range(0f, 1f)] private float SlopeChance = 0.2f;
+    [SerializeField] private float HeightRange = 100f;
+    [SerializeField] private float TrackSectionLength = 50f;
+    [SerializeField] private uint MaxGenerationIterations = 10_000;
+    
+    [Header("References")]
     [SerializeField] private Material SharedMat;
 
     [Serializable]
@@ -38,7 +46,7 @@ public class RaceGenerator : MonoBehaviour
     private static Vector2? TryGetControlPoint(Vector2 start, Vector2 startDir, Vector2 end, Vector2 endDir)
     {
         float cross = startDir.x * endDir.y - startDir.y * endDir.x;
-        if (Mathf.Abs(cross) < 1e-4f) // Tangents are parallel
+        if (Mathf.Abs(cross) < Mathf.Epsilon) // Tangents are parallel
             return null;
 
         Vector2 d = end - start;
@@ -73,8 +81,6 @@ public class RaceGenerator : MonoBehaviour
 
     public void GenerateNewTrack()
     {
-        const int TRACK_POINTS = 10;
-        
         ClearPreviousTrackGameObjects();
         Random.InitState(RandomSeed);
 
@@ -83,7 +89,7 @@ public class RaceGenerator : MonoBehaviour
         bool createdLoopedTrack = false;
         int iterations = 0;
 
-        while (!createdLoopedTrack && iterations < 1000)
+        while (!createdLoopedTrack && iterations < MaxGenerationIterations)
         {
             splines.Clear();
             iterations++;
@@ -93,16 +99,16 @@ public class RaceGenerator : MonoBehaviour
 
             float height = 0f;
 
-            for (int i = 0; i < TRACK_POINTS; i++)
+            for (int i = 0; i < TrackPoints; i++)
             {
-                if (Random.value > 0.2f)
+                if (Random.value > SlopeChance)
                 {
                     Vector2 end = Vector2.zero;
                     Vector2? control = null;
 
                     while (!control.HasValue)
                     {
-                        end = start + Random.insideUnitCircle.normalized * 50f;
+                        end = start + Random.insideUnitCircle.normalized * TrackSectionLength;
                         control = TryGetControlPoint(start, end, dir);
                     }
 
@@ -118,7 +124,7 @@ public class RaceGenerator : MonoBehaviour
                     start = end;
 
                     //
-                    if (i > TRACK_POINTS / 2f)
+                    if (i > TrackPoints / 2f)
                     {
                         Vector2 gate = new(0f, -80f);
                         Vector2 slopeControl1 = new(0f, -65f);
@@ -169,7 +175,7 @@ public class RaceGenerator : MonoBehaviour
                 
                 else
                 {
-                    float newHeight = Random.value * 100f;
+                    float newHeight = Random.value * HeightRange;
                     
                     Vector2 control1 = start + dir.normalized * 15f;
                     Vector2 midpoint = start + dir.normalized * 30f;
