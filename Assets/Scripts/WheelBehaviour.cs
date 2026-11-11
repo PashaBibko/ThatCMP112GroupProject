@@ -25,11 +25,11 @@ public class WheelBehaviour : MonoBehaviour
             // Compression is the distance between how far the ray goes in the ground and where the ray likes to rest;
             float compression = RestLength - hit.distance;
             float springForce = (compression * SpringStrength) - velocity * DamperStrength;
-            mRigidbody.AddForceAtPosition(transform.up * springForce, transform.position);
+            //mRigidbody.AddForceAtPosition(hit.normal * springForce, transform.position);
             
             // Translate world velocity into local - xyz
-            Vector3 localVelocity = transform.InverseTransformDirection(mRigidbody.linearVelocity) * 0.9f;
-            mRigidbody.linearVelocity = transform.TransformDirection(localVelocity);
+            //Vector3 localVelocity = transform.InverseTransformDirection(hit.normal * springForce) * 0.9f;
+            //mRigidbody.linearVelocity = transform.TransformDirection(localVelocity);
 
             Debug.DrawRay(transform.position, -transform.up, Color.red);
         }

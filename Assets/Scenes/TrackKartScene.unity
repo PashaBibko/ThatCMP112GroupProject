@@ -206,8 +206,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 49194748}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.17350303, y: 0.000000014675165, z: -0.0000000025853972, w: 0.98483336}
-  m_LocalPosition: {x: 0, y: 4.5, z: -25}
+  m_LocalRotation: {x: 0.17350304, y: 0.00000000519292, z: -9.148627e-10, w: 0.98483336}
+  m_LocalPosition: {x: 0, y: 4.071, z: -25.136616}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -471,9 +471,9 @@ MonoBehaviour:
   MaxGeneratedBuildings: 500
   BuildingPrefab: {fileID: 7917237545102839342, guid: 116141977f0fc4f2ca741364ee80cbe7, type: 3}
   SharedMat: {fileID: 2100000, guid: 24fb8ce5898a35041a50c4e05597ccef, type: 2}
---- !u!4 &1083718770 stripped
+--- !u!4 &958001324 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 6878205951037251584, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
+  m_CorrespondingSourceObject: {fileID: 6733498838101628523, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
   m_PrefabInstance: {fileID: 6356945281175272741}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1283225492
@@ -606,8 +606,8 @@ MonoBehaviour:
   m_StreamingVersion: 20170927
   m_Priority: 10
   m_StandbyUpdate: 2
-  m_LookAt: {fileID: 1083718770}
-  m_Follow: {fileID: 1083718770}
+  m_LookAt: {fileID: 958001324}
+  m_Follow: {fileID: 958001324}
   m_Lens:
     FieldOfView: 50
     OrthographicSize: 10
@@ -635,8 +635,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2004291584}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.17350298, y: 0.000000014675162, z: -0.0000000025853961, w: 0.9848334}
-  m_LocalPosition: {x: 0, y: 4.5, z: -25}
+  m_LocalRotation: {x: 0.173503, y: 0.0000000051929185, z: -9.148625e-10, w: 0.9848334}
+  m_LocalPosition: {x: 0, y: 4.071, z: -25.136616}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -654,30 +654,6 @@ PrefabInstance:
     - target: {fileID: 596671926795447121, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
       propertyPath: m_Name
       value: PlayerKart
-      objectReference: {fileID: 0}
-    - target: {fileID: 2546500861556785082, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
-      propertyPath: DamperStrength
-      value: 50
-      objectReference: {fileID: 0}
-    - target: {fileID: 2546500861556785082, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
-      propertyPath: SpringStrength
-      value: 200
-      objectReference: {fileID: 0}
-    - target: {fileID: 3094345124919470795, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
-      propertyPath: DamperStrength
-      value: 50
-      objectReference: {fileID: 0}
-    - target: {fileID: 3094345124919470795, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
-      propertyPath: SpringStrength
-      value: 200
-      objectReference: {fileID: 0}
-    - target: {fileID: 3585275320856473909, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
-      propertyPath: Speed
-      value: 100
-      objectReference: {fileID: 0}
-    - target: {fileID: 3585275320856473909, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
-      propertyPath: TurnStrength
-      value: 0.08
       objectReference: {fileID: 0}
     - target: {fileID: 6878205951037251584, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
       propertyPath: m_LocalPosition.x
@@ -718,26 +694,6 @@ PrefabInstance:
     - target: {fileID: 6878205951037251584, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7033759104401724896, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
-      propertyPath: DamperStrength
-      value: 50
-      objectReference: {fileID: 0}
-    - target: {fileID: 7033759104401724896, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
-      propertyPath: SpringStrength
-      value: 200
-      objectReference: {fileID: 0}
-    - target: {fileID: 7515500557943477236, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
-      propertyPath: DamperStrength
-      value: 50
-      objectReference: {fileID: 0}
-    - target: {fileID: 7515500557943477236, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
-      propertyPath: SpringStrength
-      value: 200
-      objectReference: {fileID: 0}
-    - target: {fileID: 8499574361443253959, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
-      propertyPath: m_Mass
-      value: 15
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

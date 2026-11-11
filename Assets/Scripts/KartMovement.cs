@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class KartMovement : MonoBehaviour
@@ -7,28 +8,39 @@ public class KartMovement : MonoBehaviour
     public float Speed;
     public float TurnStrength;
     public float RotSmoothing;
+    
+    public Transform ModelTransform;
 
     private void Start()
     {
         mRigidbody = GetComponent<Rigidbody>();
     }
 
+    private float mRotationalVelocity;
+    private float mCurrentModelRot;
+
     // Update is called once per frame
-    private void FixedUpdate()
+    private void Update()
     {
         float vInput = Input.GetAxis("Vertical");
         float hInput = Input.GetAxis("Horizontal");
-        float currentSpeed = mRigidbody.linearVelocity.magnitude * 75;
-        currentSpeed = Mathf.Clamp(currentSpeed,-300,1600);
 
-        if(vInput < 0)
-            currentSpeed *= -1;
-        else
-            currentSpeed = Mathf.Abs(currentSpeed);
+        if (Physics.Raycast(transform.position, -transform.up, out RaycastHit hit, 10f))
+        {
+            Vector3 dir = -Vector3.Cross(hit.normal, transform.right).normalized;
+            Debug.DrawRay(transform.position, dir * 15f, Color.deepPink);
+            mRigidbody.linearVelocity = dir * (Speed * vInput);
 
-        Debug.Log("CurrentSpeed: " + currentSpeed);
-        Debug.Log("VInput: " + vInput);
-        mRigidbody.AddForce(transform.forward * (vInput * (Speed + currentSpeed)));
+            mCurrentModelRot = Mathf.SmoothDamp
+            (
+                mCurrentModelRot,
+                Vector3.Angle(hit.normal, transform.forward) * -Mathf.Sign(hit.normal.y) + 90f,
+                ref mRotationalVelocity,
+                0.1f
+            );
+            ModelTransform.localEulerAngles = new Vector3(mCurrentModelRot, 0f, 0f);
+        }
+        
         KartRotations(hInput, mRigidbody.linearVelocity.magnitude);
     }
 
@@ -38,15 +50,6 @@ public class KartMovement : MonoBehaviour
         speed = Mathf.Clamp(speed, 0, 8);
         transform.Rotate(0, input * TurnStrength * speed, 0);
 
-        float xRot = transform.eulerAngles.x;
-        if (xRot > 180)
-        {
-            xRot -= 360;
-        }
-        //limit the x rotation to stop car from flipping
-        xRot = Mathf.Clamp(xRot, -50f, 50f);
-
-        transform.rotation = Quaternion.Euler(xRot,transform.eulerAngles.y,0);
         //this is  for if the car is in midair or if it ends flipped up somehow - it rotates it facing straight up;
         if (!Physics.Raycast(transform.position,-transform.up,2))
         {

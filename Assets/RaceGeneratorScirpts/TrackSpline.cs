@@ -104,6 +104,7 @@ public class TrackSpline : MonoBehaviour
 
         transform.GetComponent<MeshRenderer>().sharedMaterial = mat;
         
+        mesh.RecalculateNormals();
         mCollider.sharedMesh = mesh;
         mFilter.mesh = mesh;
     }
