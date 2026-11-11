@@ -28,6 +28,8 @@ public class RaceGenerator : MonoBehaviour
         public float Angle;
         public float Distance;
     }
+    
+    private void Start() => GenerateNewTrack();
 
     private static Vector2? TryGetControlPoint(Vector2 start, Vector2 end, Vector2 dir)
     {

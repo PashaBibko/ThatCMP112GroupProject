@@ -206,7 +206,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 49194748}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.17350297, y: -0.000000016582, z: 0.0000000029213327, w: 0.98483336}
+  m_LocalRotation: {x: 0.17350303, y: 0.000000014675165, z: -0.0000000025853972, w: 0.98483336}
   m_LocalPosition: {x: 0, y: 4.5, z: -25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -522,7 +522,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa7155796051b734daa718462081dc5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Cinemachine::Cinemachine.CinemachineTransposer
-  m_BindingMode: 1
+  m_BindingMode: 2
   m_FollowOffset: {x: 0, y: 4, z: -10}
   m_XDamping: 1
   m_YDamping: 1
@@ -635,7 +635,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2004291584}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.17350297, y: -0.00000001688029, z: 0.0000000046144777, w: 0.98483336}
+  m_LocalRotation: {x: 0.17350298, y: 0.000000014675162, z: -0.0000000025853961, w: 0.9848334}
   m_LocalPosition: {x: 0, y: 4.5, z: -25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
