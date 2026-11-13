@@ -428,6 +428,7 @@ GameObject:
   m_Component:
   - component: {fileID: 816636475}
   - component: {fileID: 816636476}
+  - component: {fileID: 816636477}
   m_Layer: 0
   m_Name: Generator
   m_TagString: Untagged
@@ -469,8 +470,41 @@ MonoBehaviour:
   TrackSectionLength: 50
   MaxGenerationIterations: 10000
   MaxGeneratedBuildings: 500
+  NavMesh: {fileID: 816636477}
   BuildingPrefab: {fileID: 7917237545102839342, guid: 116141977f0fc4f2ca741364ee80cbe7, type: 3}
   SharedMat: {fileID: 2100000, guid: 24fb8ce5898a35041a50c4e05597ccef, type: 2}
+--- !u!114 &816636477
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 816636474}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshSurface
+  m_SerializedVersion: 0
+  m_AgentTypeID: 0
+  m_CollectObjects: 0
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 2147483648
+  m_UseGeometry: 1
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 0
+  m_VoxelSize: 0.16666667
+  m_MinRegionArea: 2
+  m_NavMeshData: {fileID: 0}
+  m_BuildHeightMesh: 0
 --- !u!4 &958001324 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6733498838101628523, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
@@ -657,11 +691,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5938362335831941518, guid: 2445c2bc9bad93d46af951e0e230d4bc, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5938362335831941518, guid: 2445c2bc9bad93d46af951e0e230d4bc, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -5
+      value: -7
       objectReference: {fileID: 0}
     - target: {fileID: 5938362335831941518, guid: 2445c2bc9bad93d46af951e0e230d4bc, type: 3}
       propertyPath: m_LocalRotation.w
@@ -751,18 +785,6 @@ PrefabInstance:
     - target: {fileID: 6878205951037251584, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8333998524803610878, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
-      propertyPath: m_Radius
-      value: 0.8
-      objectReference: {fileID: 0}
-    - target: {fileID: 8333998524803610878, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
-      propertyPath: m_Center.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8333998524803610878, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
-      propertyPath: m_Center.z
-      value: 0.3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

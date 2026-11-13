@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Unity.AI.Navigation;
 using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 #if UNITY_EDITOR
@@ -19,6 +22,7 @@ public class RaceGenerator : MonoBehaviour
     [SerializeField] private uint MaxGeneratedBuildings = 1000;
     
     [Header("References")]
+    [SerializeField] private NavMeshSurface NavMesh;
     [SerializeField] private GameObject BuildingPrefab;
     [SerializeField] private Material SharedMat;
 
@@ -259,6 +263,8 @@ public class RaceGenerator : MonoBehaviour
                     go.transform.position = new Vector3(pos.x, h, pos.y);
                 }
             }
+            
+            NavMesh.BuildNavMesh();
         }
 
 #if UNITY_EDITOR
