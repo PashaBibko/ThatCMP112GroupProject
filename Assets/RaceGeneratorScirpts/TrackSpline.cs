@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using Unity.AI.Navigation;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.AI;
 
 [System.Serializable]
 public struct Spline
@@ -46,11 +48,15 @@ public class TrackSpline : MonoBehaviour
 {
     [field: SerializeField] public Spline Spline { get; set; }
 
+    private NavMeshSurface mNavMesh;
     private MeshCollider mCollider;
     private MeshFilter mFilter;
 
     private void Awake()
     {
+        gameObject.layer = LayerMask.NameToLayer("GeneratedTrack");
+        
+        mNavMesh = gameObject.GetOrAddComponent<NavMeshSurface>();
         mCollider = gameObject.GetOrAddComponent<MeshCollider>();
         mFilter = gameObject.GetOrAddComponent<MeshFilter>();
         
@@ -107,6 +113,10 @@ public class TrackSpline : MonoBehaviour
         mesh.RecalculateNormals();
         mCollider.sharedMesh = mesh;
         mFilter.mesh = mesh;
+
+        mNavMesh.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+        mNavMesh.layerMask = ~LayerMask.NameToLayer("GeneratedTrack");
+        mNavMesh.BuildNavMesh();
     }
 
     private void OnDrawGizmosSelected()
