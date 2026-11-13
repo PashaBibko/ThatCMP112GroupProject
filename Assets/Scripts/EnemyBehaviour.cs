@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine.AI;
 using UnityEngine;
@@ -10,26 +11,33 @@ public class EnemyBehaviour : MonoBehaviour
     private TrackSpline mCurrentTrack;
     private float mLerp;
 
-    private void Update()
+    private IEnumerator Start()
     {
-        if (mAgent.IsUnityNull())
+        // Waits until the nav mesh has been baked to create the agent
+        while (mAgent.IsUnityNull())
         {
             if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 5f, NavMesh.AllAreas))
             {
                 transform.position = hit.position;
                 mAgent = gameObject.AddComponent<NavMeshAgent>();
             }
+            
             else
-            {
-                Debug.LogError($"{name}: no NavMesh within 5 units of {transform.position}", this);
-            }
+                yield return new WaitForFixedUpdate();
         }
 
-        if (mAgent.IsUnityNull()) return;
-
-        if (!mAgent.SetDestination(new Vector3(-153.7088f, 18.58449f, 105.8145f)))
+        mAgent.speed = 25f;
+        
+        // Makes the enemy travel around the track
+        while (true)
         {
-            Debug.LogError($"{name}: NavMeshAgent.SetDestination failed", this);
+            if (Physics.Raycast(transform.position, -transform.up, out RaycastHit hit))
+                if (hit.collider.TryGetComponent(out TrackSpline spline))
+                    mAgent.SetDestination(spline.Next.Next.Next.Next.Next.Spline.EndPoint);
+
+            yield return new WaitForSeconds(1f + Random.value); // Adds random to stop CPU dying once every second
         }
+        
+        // ReSharper disable once IteratorNeverReturns
     }
 }
