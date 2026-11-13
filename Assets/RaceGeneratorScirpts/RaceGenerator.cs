@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Unity.AI.Navigation;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Serialization;
@@ -218,6 +219,9 @@ public class RaceGenerator : MonoBehaviour
             
             float maxX = float.MinValue;
             float maxY = float.MinValue;
+
+            TrackSpline previousSpline = null;
+            TrackSpline first = null;
             
             foreach (Spline spline in splines)
             {
@@ -241,9 +245,17 @@ public class RaceGenerator : MonoBehaviour
                 track.transform.SetParent(transform);
 
                 TrackSpline trackSpline = track.AddComponent<TrackSpline>();
+                first ??= trackSpline;
+
+                if (!previousSpline.IsUnityNull())
+                    previousSpline!.Next = trackSpline;
+                previousSpline = trackSpline;
+
                 trackSpline.Spline = spline;
                 trackSpline.GenerateMesh(SharedMat);
             }
+            
+            previousSpline!.Next = first;
 
             for (int i = 0; i < MaxGeneratedBuildings; i++)
             {

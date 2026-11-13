@@ -46,6 +46,8 @@ public struct Spline
 [ExecuteAlways]
 public class TrackSpline : MonoBehaviour
 {
+    public TrackSpline Next;
+    
     [field: SerializeField] public Spline Spline { get; set; }
 
     private MeshCollider mCollider;
