@@ -74,8 +74,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb59d050ccb46a749a224b5c7c51590e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KartMovement
-  Speed: 15
-  TurnStrength: 0.08
+  Speed: 20
+  TurnStrength: 0.01
   RotSmoothing: 1
   ModelTransform: {fileID: 6733498838101628523}
 --- !u!135 &8333998524803610878
