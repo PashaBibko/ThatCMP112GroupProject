@@ -5,11 +5,13 @@ using UnityEngine;
 
 public class EnemyBehaviour : MonoBehaviour
 {
-    private NavMeshAgent mAgent;
-    private Rigidbody mBody;
+    [SerializeField] private Transform KartModel;
     
+    private NavMeshAgent mAgent;
     private TrackSpline mCurrentTrack;
     private float mLerp;
+
+    private Vector3 mLastPosition;
 
     private IEnumerator Start()
     {
@@ -26,18 +28,36 @@ public class EnemyBehaviour : MonoBehaviour
                 yield return new WaitForFixedUpdate();
         }
 
-        mAgent.speed = 25f;
+        mAgent.speed = 30f;
+        mAgent.autoBraking = false;
+        mAgent.angularSpeed = 300f;
         
         // Makes the enemy travel around the track
         while (true)
         {
+            // Stops multiple paths being queued at the same time
+            while (mAgent.pathPending)
+                yield return new WaitForFixedUpdate();
+            
+            Debug.Log("Calculating new target point");
             if (Physics.Raycast(transform.position, -transform.up, out RaycastHit hit))
+            {
                 if (hit.collider.TryGetComponent(out TrackSpline spline))
-                    mAgent.SetDestination(spline.Next.Next.Next.Next.Next.Spline.EndPoint);
+                {
+                    mAgent.SetDestination(spline.Next.Spline.EndPoint + Random.insideUnitSphere * 2.5f);
+                    yield return new WaitForFixedUpdate(); // Stops possible infinite loops
+                }
+            }
 
-            yield return new WaitForSeconds(1f + Random.value); // Adds random to stop CPU dying once every second
+            while (mAgent.remainingDistance > mAgent.stoppingDistance + 15f)
+                yield return new WaitForFixedUpdate();
         }
         
         // ReSharper disable once IteratorNeverReturns
+    }
+
+    private void Update()
+    {
+        KartModel.LookAt(transform.position + mAgent.velocity * 10f);
     }
 }

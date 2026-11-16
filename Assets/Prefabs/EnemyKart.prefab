@@ -45,6 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b230261f2556ab438ee0d713cec320d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyBehaviour
+  KartModel: {fileID: 6076517279794834086}
 --- !u!1001 &6043436216094608717
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class KartMovement : MonoBehaviour
@@ -54,7 +53,7 @@ public class KartMovement : MonoBehaviour
         if (!Physics.Raycast(transform.position,-transform.up,2))
         {
             Quaternion rotationTarget = Quaternion.Euler(0, transform.eulerAngles.y, 0);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation,rotationTarget,RotSmoothing);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, rotationTarget, RotSmoothing);
         }
     }
 }
