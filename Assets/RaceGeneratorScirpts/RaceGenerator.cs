@@ -276,7 +276,7 @@ public class RaceGenerator : MonoBehaviour
                 }
             }
             
-            NavMesh.BuildNavMesh();
+            NavMesh?.BuildNavMesh();
         }
 
 #if UNITY_EDITOR

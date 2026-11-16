@@ -58,6 +58,7 @@ public class EnemyBehaviour : MonoBehaviour
 
     private void Update()
     {
-        KartModel.LookAt(transform.position + mAgent.velocity * 10f);
+        if (!mAgent.IsUnityNull())
+            KartModel.LookAt(transform.position + mAgent.velocity * 10f);
     }
 }
