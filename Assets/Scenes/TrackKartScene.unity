@@ -875,6 +875,25 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1728888669}
   m_CullTransparentMesh: 1
+--- !u!1 &1890664819 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 596671926795447121, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
+  m_PrefabInstance: {fileID: 6356945281175272741}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1890664824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1890664819}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32d1db0c94633e24d99c4d217c521d99, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SmokeParticleScript
+  rb: {fileID: 0}
+  SmokeParticles: {fileID: 4195046691262350792, guid: 7c46bc97567ef694795cc3764f127214, type: 3}
 --- !u!1 &1963794792
 GameObject:
   m_ObjectHideFlags: 0
@@ -1081,7 +1100,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 596671926795447121, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1890664824}
   m_SourcePrefab: {fileID: 100100000, guid: cd31f900951904a4b8dd4ab6ad80621f, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
