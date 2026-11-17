@@ -1,10 +1,8 @@
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.AI.Navigation;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.AI;
-using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 #if UNITY_EDITOR
@@ -27,13 +25,6 @@ public class RaceGenerator : MonoBehaviour
     [SerializeField] private GameObject BuildingPrefab;
     [SerializeField] private Material SharedMat;
 
-    [Serializable]
-    private struct PolarCoord
-    {
-        public float Angle;
-        public float Distance;
-    }
-    
     private void Start() => GenerateNewTrack();
 
     private static Vector2? TryGetControlPoint(Vector2 start, Vector2 end, Vector2 dir)
@@ -58,9 +49,9 @@ public class RaceGenerator : MonoBehaviour
         if (Mathf.Abs(cross) < Mathf.Epsilon) // Tangents are parallel
             return null;
 
-        Vector2 d = end - start;
-        float t = (d.x * endDir.y - d.y * endDir.x) / cross;
-        float s = (startDir.x * d.y - startDir.y * d.x) / cross;
+        Vector2 dir = end - start;
+        float t = (dir.x * endDir.y - dir.y * endDir.x) / cross;
+        float s = (startDir.x * dir.y - startDir.y * dir.x) / cross;
         if (t is > 15f and < 50f && s is > 15f and < 50f) // Stops the splines from curving back, or being too long
             return start + startDir * t;
         
@@ -69,12 +60,10 @@ public class RaceGenerator : MonoBehaviour
 
     private void ClearPreviousTrackGameObjects()
     {
-        List<GameObject> children = new();
-        foreach (Transform child in transform)
-        {
-            children.Add(child.gameObject);
-        }
-        
+        // Collects all of the current children game objects
+        List<GameObject> children = (from Transform child in transform select child.gameObject).ToList();
+
+        // Calls the correct function depending on the current environment
         foreach (GameObject child in children)
         {
 #if UNITY_EDITOR
@@ -90,37 +79,44 @@ public class RaceGenerator : MonoBehaviour
 
     public void GenerateNewTrack()
     {
+        // Cleanly sets up the scene for the track
         ClearPreviousTrackGameObjects();
         Random.InitState(RandomSeed);
 
         List<Spline> splines = new();
-        
         bool createdLoopedTrack = false;
         int iterations = 0;
 
+        // Tries upto x amount of times to create a rounded track, stops to avoid infinite loops if there
+        // is an issue in the track generation as it would cause the game to crash
         while (!createdLoopedTrack && iterations < MaxGenerationIterations)
         {
             splines.Clear();
             iterations++;
             
+            // Current information about the track generation to use between different sections
             Vector2 start = Vector2.zero;
             Vector2 dir = Vector2.up;
-
             float height = 0f;
 
+            // Generates UPTO x amount of track points, can generate a minimum of x/2 points
+            // Not guaranteed to output a looped track
             for (int i = 0; i < TrackPoints; i++)
             {
+                // Either generates a curve or slope
                 if (Random.value > SlopeChance)
                 {
                     Vector2 end = Vector2.zero;
                     Vector2? control = null;
 
+                    // Tries different end points until it finds one that has a suitable curve
                     while (!control.HasValue)
                     {
                         end = start + Random.insideUnitCircle.normalized * TrackSectionLength;
                         control = TryGetControlPoint(start, end, dir);
                     }
 
+                    // Generates the spline object and adds it to the collection
                     splines.Add(new Spline
                     {
                         StartPoint = new Vector3(start.x, height, start.y),
@@ -128,11 +124,12 @@ public class RaceGenerator : MonoBehaviour
                         EndPoint = new Vector3(end.x, height, end.y)
                     });
 
+                    // Stores persistent information about the track generation
                     Vector3 dir3D = splines[^1].GetDirectionAtPoint(1f);
                     dir = new Vector2(dir3D.x, dir3D.z);
                     start = end;
 
-                    //
+                    // After the track is halfway through the maximum length it tries to generate a smooth path back to the start
                     if (i > TrackPoints / 2f)
                     {
                         Vector2 gate = new(0f, -80f);
@@ -177,6 +174,7 @@ public class RaceGenerator : MonoBehaviour
                             EndPoint = Vector3.zero
                         });
 
+                        // The track is now a loop so we exit out of the loop to progress and create it in the world
                         createdLoopedTrack = true;
                         break;
                     }
@@ -184,13 +182,16 @@ public class RaceGenerator : MonoBehaviour
                 
                 else
                 {
+                    // New height for the track to be on
                     float newHeight = Random.value * HeightRange;
                     
+                    // Slopes are split into 2 splines so we need two control points
                     Vector2 control1 = start + dir.normalized * 15f;
                     Vector2 midpoint = start + dir.normalized * 30f;
                     Vector2 control2 = start + dir.normalized * 45f;
                     Vector2 end = start + dir.normalized * 60f;
 
+                    // Adds the splines to the collection
                     splines.Add(new Spline
                     {
                         StartPoint = new Vector3(start.x, height, start.y),
@@ -205,79 +206,79 @@ public class RaceGenerator : MonoBehaviour
                         EndPoint = new Vector3(end.x, newHeight, end.y)
                     });
 
+                    // Stores persistent information
                     height = newHeight;
                     start = end;
                 }
             }
         }
 
-        Debug.Log($"Generation took {iterations} iterations");
-        if (createdLoopedTrack)
+        // Early exit if the track does not generate properly
+        if (!createdLoopedTrack)
         {
-            float minX = float.MaxValue;
-            float minY = float.MaxValue;
-            
-            float maxX = float.MinValue;
-            float maxY = float.MinValue;
-
-            TrackSpline previousSpline = null;
-            TrackSpline first = null;
-            
-            foreach (Spline spline in splines)
-            {
-                minX = Mathf.Min(minX, spline.ControlPoint.x);
-                minX = Mathf.Min(minX, spline.StartPoint.x);
-                minX = Mathf.Min(minX, spline.EndPoint.x);
-                
-                maxX = Mathf.Max(maxX, spline.ControlPoint.x);
-                maxX = Mathf.Max(maxX, spline.StartPoint.x);
-                maxX = Mathf.Max(maxX, spline.EndPoint.x);
-                
-                minY = Mathf.Min(minY, spline.ControlPoint.z);
-                minY = Mathf.Min(minY, spline.StartPoint.z);
-                minY = Mathf.Min(minY, spline.EndPoint.z);
-                
-                maxY = Mathf.Max(maxY, spline.ControlPoint.z);
-                maxY = Mathf.Max(maxY, spline.StartPoint.z);
-                maxY = Mathf.Max(maxY, spline.EndPoint.z);
-                
-                GameObject track = new("Track");
-                track.transform.SetParent(transform);
-
-                TrackSpline trackSpline = track.AddComponent<TrackSpline>();
-                first ??= trackSpline;
-
-                if (!previousSpline.IsUnityNull())
-                    previousSpline!.Next = trackSpline;
-                previousSpline = trackSpline;
-
-                trackSpline.Spline = spline;
-                trackSpline.GenerateMesh(SharedMat);
-            }
-            
-            previousSpline!.Next = first;
-
-            for (int i = 0; i < MaxGeneratedBuildings; i++)
-            {
-                Vector2 pos = new
-                (
-                    Random.Range(minX - 150f, maxX + 150f),
-                    Random.Range(minY - 150f, maxY + 150f)
-                );
-
-                float h = Random.Range(0f, HeightRange + 100f);
-                
-                bool hit = Physics.BoxCast(new Vector3(pos.x, h + 25f, pos.y), Vector3.one * 15f, Vector3.down);
-
-                if (!hit)
-                {
-                    GameObject go = Instantiate(BuildingPrefab, transform, true);
-                    go.transform.position = new Vector3(pos.x, h, pos.y);
-                }
-            }
-            
-            NavMesh?.BuildNavMesh();
+            Debug.LogError("Could not generate track, try a different seed or check generation code.");
+            return;
         }
+
+        // Trackers for the bounding box of all the spline points
+        float minX = float.MaxValue;
+        float minZ = float.MaxValue;
+        float maxX = float.MinValue;
+        float maxZ = float.MinValue;
+
+        TrackSpline previousSpline = null;
+        TrackSpline first = null;
+
+        // Loops through each of the track segment splines and creates game objects for them
+        foreach (Spline spline in splines)
+        {
+            minX = Mathf.Min(minX, spline.StartPoint.x, spline.ControlPoint.x, spline.EndPoint.x);
+            maxX = Mathf.Max(maxX, spline.StartPoint.x, spline.ControlPoint.x, spline.EndPoint.x);
+
+            minZ = Mathf.Min(minZ, spline.StartPoint.z, spline.ControlPoint.z, spline.EndPoint.z);
+            maxZ = Mathf.Max(maxZ, spline.StartPoint.z, spline.ControlPoint.z, spline.EndPoint.z);
+
+            GameObject track = new("Track");
+            track.transform.SetParent(transform);
+
+            TrackSpline trackSpline = track.AddComponent<TrackSpline>();
+            first ??= trackSpline;
+
+            // Generates the actual mesh and colliders after assigning the spline
+            trackSpline.Spline = spline;
+            trackSpline.GenerateMesh(SharedMat);
+
+            // Makes the previous section know that the current one is after it (used for pathfinding)
+            if (!previousSpline.IsUnityNull())
+                previousSpline!.Next = trackSpline;
+            previousSpline = trackSpline;
+        }
+
+        // Makes the last spline know about the first so they all loop together
+        previousSpline!.Next = first;
+
+        // Using rejection sampling tries to generate buildings X amount of times
+        for (int i = 0; i < MaxGeneratedBuildings; i++)
+        {
+            // Within a slightly larger area th
+            Vector3 pos = new
+            (
+                Random.Range(minX - 150f, maxX + 150f),
+                Random.Range(-50f, HeightRange + 100f), // Height range is constant
+                Random.Range(minZ - 150f, maxZ + 150f)
+            );
+
+            // Checks that the area is available before spawning
+            Vector3 buildingSize = Vector3.one * 15f;
+            if (!Physics.BoxCast(new Vector3(pos.x, pos.y + 25f, pos.z), buildingSize, Vector3.down))
+            {
+                GameObject go = Instantiate(BuildingPrefab, transform, true);
+                go.transform.position = pos;
+            }
+        }
+
+        // Builds the nav mesh so Enemy AI can pathfind on it
+        NavMesh?.BuildNavMesh();
 
 #if UNITY_EDITOR
         SceneView.RepaintAll(); // Force redraw gizmo
