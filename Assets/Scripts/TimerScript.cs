@@ -4,7 +4,7 @@ using UnityEngine.UI;
 public class TimerScript : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    float Timer;
+    public float Timer;
     public Text TimerText;
     public bool TimerRunning;
     void Start()
