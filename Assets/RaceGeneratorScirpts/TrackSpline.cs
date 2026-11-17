@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using Unity.AI.Navigation;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.AI;
 
 [System.Serializable]
 public struct Spline
@@ -44,6 +46,8 @@ public struct Spline
 [ExecuteAlways]
 public class TrackSpline : MonoBehaviour
 {
+    public TrackSpline Next;
+    
     [field: SerializeField] public Spline Spline { get; set; }
 
     private MeshCollider mCollider;
@@ -51,6 +55,8 @@ public class TrackSpline : MonoBehaviour
 
     private void Awake()
     {
+        gameObject.layer = LayerMask.NameToLayer("GeneratedTrack");
+        
         mCollider = gameObject.GetOrAddComponent<MeshCollider>();
         mFilter = gameObject.GetOrAddComponent<MeshFilter>();
         

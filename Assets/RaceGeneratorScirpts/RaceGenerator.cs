@@ -1,6 +1,10 @@
 using System;
 using System.Collections.Generic;
+using Unity.AI.Navigation;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 #if UNITY_EDITOR
@@ -19,6 +23,7 @@ public class RaceGenerator : MonoBehaviour
     [SerializeField] private uint MaxGeneratedBuildings = 1000;
     
     [Header("References")]
+    [SerializeField] private NavMeshSurface NavMesh;
     [SerializeField] private GameObject BuildingPrefab;
     [SerializeField] private Material SharedMat;
 
@@ -214,6 +219,9 @@ public class RaceGenerator : MonoBehaviour
             
             float maxX = float.MinValue;
             float maxY = float.MinValue;
+
+            TrackSpline previousSpline = null;
+            TrackSpline first = null;
             
             foreach (Spline spline in splines)
             {
@@ -237,9 +245,17 @@ public class RaceGenerator : MonoBehaviour
                 track.transform.SetParent(transform);
 
                 TrackSpline trackSpline = track.AddComponent<TrackSpline>();
+                first ??= trackSpline;
+
+                if (!previousSpline.IsUnityNull())
+                    previousSpline!.Next = trackSpline;
+                previousSpline = trackSpline;
+
                 trackSpline.Spline = spline;
                 trackSpline.GenerateMesh(SharedMat);
             }
+            
+            previousSpline!.Next = first;
 
             for (int i = 0; i < MaxGeneratedBuildings; i++)
             {
@@ -259,6 +275,8 @@ public class RaceGenerator : MonoBehaviour
                     go.transform.position = new Vector3(pos.x, h, pos.y);
                 }
             }
+            
+            NavMesh?.BuildNavMesh();
         }
 
 #if UNITY_EDITOR
