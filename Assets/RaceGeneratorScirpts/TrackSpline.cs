@@ -1,8 +1,6 @@
 using System.Collections.Generic;
-using Unity.AI.Navigation;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.AI;
 
 [System.Serializable]
 public struct Spline
@@ -26,21 +24,6 @@ public struct Spline
         Vector3 p1 = GetPoint(t + DELTA);
         return (p1 - p0).normalized;
     }
-
-    public float GetLength()
-    {
-        const int SEGMENTS = 50;
-
-        float length = 0f;
-        for (int i = 0; i < SEGMENTS - 1; i++)
-        {
-            Vector3 start = GetPoint((float)i / SEGMENTS);
-            Vector3 end = GetPoint((float)(i + 1) / SEGMENTS);
-            length += Vector3.Distance(start, end);
-        }
-
-        return length;
-    }
 }
 
 [ExecuteAlways]
@@ -57,9 +40,9 @@ public class TrackSpline : MonoBehaviour
     {
         gameObject.layer = LayerMask.NameToLayer("GeneratedTrack");
         
+        // Makes sure the right components are attached to the game object
         mCollider = gameObject.GetOrAddComponent<MeshCollider>();
         mFilter = gameObject.GetOrAddComponent<MeshFilter>();
-        
         gameObject.GetOrAddComponent<MeshRenderer>();
     }
 
@@ -79,20 +62,20 @@ public class TrackSpline : MonoBehaviour
             Vector3 dir = Spline.GetDirectionAtPoint(t);
             Vector3 right = Vector3.Cross(dir, Vector3.up).normalized;
 
-            Vector3 lhs = point - right * TRACK_WIDTH;
-            Vector3 rhs = point + right * TRACK_WIDTH;
-
-            verts.Add(lhs);
-            verts.Add(rhs);
+            // Creates two vertices for the mesh either side of the track
+            verts.Add(point - right * TRACK_WIDTH);
+            verts.Add(point + right * TRACK_WIDTH);
         }
 
         for (int i = 0; i < RENDER_SEGMENTS; i++)
         {
+            // The four indices of the vertices of the current quad
             int bl = i * 2;
             int br = (i * 2) + 1;
             int tl = (i + 1) * 2;
             int tr = ((i + 1) * 2) + 1;
 
+            // Creates two triangles to make the quad (winding order does not matter due to the material)
             tris.Add(bl);
             tris.Add(br);
             tris.Add(tl);
@@ -102,6 +85,7 @@ public class TrackSpline : MonoBehaviour
             tris.Add(tr);
         }
 
+        // Creates the mesh and assigns it to the components
         Mesh mesh = new()
         {
             vertices = verts.ToArray(),
