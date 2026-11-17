@@ -47,7 +47,7 @@ public class GoalScript : MonoBehaviour
 
     private void ShowGoalUI(string name)
     {
-        boxCol.enabled = false;
+        boxCol.gameObject.SetActive(false);
         GoalUI.SetActive(true);
         TimerScript.TimerRunning = false;
         Text WinnerText = GoalUI.transform.GetChild(1).gameObject.GetComponent<Text>();
