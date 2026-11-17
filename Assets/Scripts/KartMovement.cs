@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class KartMovement : MonoBehaviour
 {
@@ -41,6 +42,8 @@ public class KartMovement : MonoBehaviour
         }
         
         KartRotations(hInput, mRigidbody.linearVelocity.magnitude);
+
+        CheckOutofBounds();
     }
 
     private void KartRotations(float input, float speed)
@@ -54,6 +57,15 @@ public class KartMovement : MonoBehaviour
         {
             Quaternion rotationTarget = Quaternion.Euler(0, transform.eulerAngles.y, 0);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, rotationTarget, RotSmoothing);
+        }
+    }
+
+
+    private void CheckOutofBounds()
+    {
+        if(transform.position.y < -30)
+        {
+            SceneManager.LoadScene("TrackKartScene");
         }
     }
 }
