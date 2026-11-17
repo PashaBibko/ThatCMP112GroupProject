@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8499574361443253959}
   - component: {fileID: 3585275320856473909}
   - component: {fileID: 8333998524803610878}
-  - component: {fileID: 1152920822719754886}
+  - component: {fileID: 6590369178366453371}
   m_Layer: 0
   m_Name: PlayerKart
   m_TagString: Untagged
@@ -101,7 +101,7 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.8
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &1152920822719754886
+--- !u!114 &6590369178366453371
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -110,13 +110,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 596671926795447121}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 32d1db0c94633e24d99c4d217c521d99, type: 3}
+  m_Script: {fileID: 11500000, guid: c7774b6b416719948bdb1f40e5408594, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SmokeParticleScript
+  m_EditorClassIdentifier: Assembly-CSharp::SmokeTrailScript
   rb: {fileID: 0}
   SmokeParticles: {fileID: 5274363927144508500}
   Kart: {fileID: 6213244723356617937}
-  m_Center: {x: 0, y: 0, z: 0.3}
 --- !u!1001 &6555139864863502720
 PrefabInstance:
   m_ObjectHideFlags: 0
