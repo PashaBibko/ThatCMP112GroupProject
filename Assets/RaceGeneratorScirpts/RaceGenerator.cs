@@ -29,14 +29,14 @@ public class RaceGenerator : MonoBehaviour
 
     private static Vector2? TryGetControlPoint(Vector2 start, Vector2 end, Vector2 dir)
     {
-        Vector2 normal = end - start;
+        Vector2 bisectorNormal = end - start;
         Vector2 mid = (start + end) * 0.5f;
         
-        float dot = Vector2.Dot(dir, normal);
+        float dot = Vector2.Dot(dir, bisectorNormal);
         if (Mathf.Abs(dot) < Mathf.Epsilon) // Bisector is parallel
             return null;
 
-        float t = Vector2.Dot(mid - start, normal) / dot;
+        float t = Vector2.Dot(mid - start, bisectorNormal) / dot;
         if (t is > 15f and < 50f) // Stops the splines from curving back, or being too long
             return start + dir * t;
 
@@ -49,9 +49,9 @@ public class RaceGenerator : MonoBehaviour
         if (Mathf.Abs(cross) < Mathf.Epsilon) // Tangents are parallel
             return null;
 
-        Vector2 dir = end - start;
-        float t = (dir.x * endDir.y - dir.y * endDir.x) / cross;
-        float s = (startDir.x * dir.y - startDir.y * dir.x) / cross;
+        Vector2 bisectorNormal = end - start;
+        float t = (bisectorNormal.x * endDir.y - bisectorNormal.y * endDir.x) / cross;
+        float s = (startDir.x * bisectorNormal.y - startDir.y * bisectorNormal.x) / cross;
         if (t is > 15f and < 50f && s is > 15f and < 50f) // Stops the splines from curving back, or being too long
             return start + startDir * t;
         
