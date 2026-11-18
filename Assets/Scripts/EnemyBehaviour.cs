@@ -6,6 +6,8 @@ using UnityEngine;
 public class EnemyBehaviour : MonoBehaviour
 {
     [SerializeField] private Transform KartModel;
+
+    private Collider mCollider;
     
     private NavMeshAgent mAgent;
     private TrackSpline mCurrentTrack;
@@ -13,6 +15,12 @@ public class EnemyBehaviour : MonoBehaviour
 
     private Vector3 mLastPosition;
 
+    private void Awake()
+    {
+        mCollider = GetComponent<Collider>();
+        mCollider.enabled = false;
+    }
+    
     private IEnumerator Start()
     {
         // Waits until the nav mesh has been baked to create the agent
@@ -42,6 +50,7 @@ public class EnemyBehaviour : MonoBehaviour
             Debug.Log("Calculating new target point");
             if (Physics.Raycast(transform.position, -transform.up, out RaycastHit hit))
             {
+                mCollider.enabled = true;
                 if (hit.collider.TryGetComponent(out TrackSpline spline))
                 {
                     mAgent.SetDestination(spline.Next.Spline.EndPoint + Random.insideUnitSphere * 2.5f);
