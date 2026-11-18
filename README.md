@@ -9,16 +9,6 @@ Public repository is available [here](https://github.com/PashaBibko/ThatCMP112Gr
 - A - Turn Left
 - D - Turn Right
 
-### Task Contribution
-
-| Feature             | Progress | Pasha | Jamie |
-| ------------------- | -------- | ----- | ----- |
-| Track Generation    | Done     | 100%  |       |
-| Building Generation | Done     | 100%  |       |
-| Kart Movement       | Done     | 50%   | 50%   |
-| Enemy AI movement   | Done     | 100%  |       |
-| Game Menus and UI   | Done     | 10%   | 90%   |
-
 ### Programming Problems
 
 ##### Pasha
@@ -47,7 +37,15 @@ generation it takes less than a second to generate a track so the issue is negli
 
 ##### Jamie
 
-Whooo writing go here
+The most difficult part of the prototype was creating the kart. Initially I tried using Unity’s wheel colliders
+but after some struggling, I found that the common consensus online was using ray casts as it was easier and more
+suited for the style of kart racing style of game we were going for compared to wheel colliders that are more often
+used for realistic simulators. Multiple videos online showcased this effect while walking the viewer through how it
+was achieved without showing the scripts. This meant that there was a lot of trial and error where some aspects such
+as the spring force and damping were relatively easy to implement compared to others such as the tire grip which I
+found especially difficult. For the tire grip the solution I found was to get the local velocity of the tires and
+dampen it on the right leading to the kart not sliding compared to before which makes the game feel much better
+to control in comparison to before.
 
 ### External
 
