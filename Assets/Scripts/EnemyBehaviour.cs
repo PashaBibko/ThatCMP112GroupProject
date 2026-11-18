@@ -60,6 +60,8 @@ public class EnemyBehaviour : MonoBehaviour
 
             while (mAgent.remainingDistance > mAgent.stoppingDistance + 15f)
                 yield return new WaitForFixedUpdate();
+            
+            yield return new WaitForFixedUpdate();
         }
         
         // ReSharper disable once IteratorNeverReturns
